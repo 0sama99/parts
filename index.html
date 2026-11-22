@@ -185,7 +185,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;margin-top:24px}
   <!-- البحث -->
   <section id="vSearch" class="hidden">
     <form class="sbox" id="sForm">
-      <input id="q" type="search" dir="auto" inputmode="search" autocomplete="off" placeholder="رقم القطعة أو الوصف (مثال: 04465 أو فحمات كامري)">
+      <input id="q" type="search" dir="auto" inputmode="search" autocomplete="off" placeholder="رقم القطعة أو الوصف">
       <button class="btn" id="sBtn">بحث</button>
     </form>
     <div class="hint" id="sInfo">اكتب رقم القطعة بأي شكل (بشرطة أو بدونها)، أو كلمات من الوصف بالعربي أو الإنجليزي. قطع لكزس تنبحث تلقائياً بحرف X.</div>
@@ -612,7 +612,7 @@ function replyText(){
   if (japan) L.push('⚠️ الطلب من اليابان ممكن يجينا فيه إشعار إن تصنيع القطعة متوقف.');
   if (pol) L.push('⚠️ ' + pol);
   if (japan || pol) L.push('');
-  L.push('مؤسسة يحيى محمد الموسى لقطع غيار تويوتا ولكزس');
+  L.push('الموسى لقطع غيار تويوتا ولكزس وديهاتسو');
   return L.join('\n');
 }
 function openSheet(){
