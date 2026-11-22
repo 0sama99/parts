@@ -802,7 +802,9 @@ function quoteLines(){
 async function buildQuotePdf(customer){
   const lines = quoteLines();
   if (!lines.length) throw new Error('ما فيه قطع متوفرة أو طلبيات في القائمة');
-  const [hdr, ftr] = await Promise.all([loadImg('quote-header.jpg'), loadImg('quote-footer.jpg')]);
+  // الآيفون أحياناً يغيّر .jpg إلى .jpeg وقت الرفع، فنجرب الاثنين
+  const img2 = n => loadImg(n + '.jpg').catch(() => loadImg(n + '.jpeg'));
+  const [hdr, ftr] = await Promise.all([img2('quote-header'), img2('quote-footer')]);
   const W = 1654, H = 2339, M = 110, CW = W - 2 * M, R = W - M, L = M;
   const FONT = 'Arial, "Helvetica Neue", "Geeza Pro", "SF Arabic", Tahoma, sans-serif';
   // ألوان هوية الموسى
