@@ -77,6 +77,17 @@ header{position:sticky;top:0;z-index:20;background:var(--brand);color:var(--bran
 .pin span{color:var(--muted)}
 .pin input{width:110px;text-align:center;border:1.5px solid var(--main-line);border-radius:9px;padding:5px;font-size:16px;direction:ltr;background:var(--card);color:var(--ink)}
 .reset{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:4px 9px;font-size:13px}
+.vin{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap}
+.vin input{width:140px;text-align:center;border:1.5px solid var(--main-line);border-radius:9px;padding:6px;font-size:22px;font-weight:700;direction:ltr;background:var(--card);color:var(--ink)}
+.vin span{color:var(--muted);font-size:14px}
+.vin .h{font-size:12.5px}
+.cqty{border:1px solid var(--line);border-radius:10px;padding:3px 6px}
+.cqty span{color:var(--muted);font-size:13.5px}
+.cact{align-items:center}
+.lt .old{text-decoration:line-through;color:var(--muted);font-weight:400;font-size:12.5px}
+.rtot{margin:10px 0;padding:10px;border-radius:12px}
+.rtot .cp{border-top:1px solid var(--main-line);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14.5px}
+.rtot .cp span span{color:var(--muted)}
 .warn{margin-top:6px;background:var(--nobg);color:var(--no);border-radius:8px;padding:4px 8px;font-size:13.5px;font-weight:600}
 .disc span{color:var(--ink);font-weight:600}
 .disc button{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--card);font-size:18px;line-height:1;color:var(--ink)}
@@ -226,6 +237,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;margin-top:24px}
   <div class="in">
     <div style="display:flex;align-items:center;margin-bottom:6px"><b style="flex:1">الرد على الزبون</b><button class="btn sec" id="rClose" style="padding:6px 12px">إغلاق</button></div>
     <div id="rItems"></div>
+    <div id="rTot"></div>
     <label class="chk"><input type="checkbox" id="rShowPn"> إظهار رقم القطعة للزبون</label>
     <div class="hint" style="margin-top:8px">تقدر تعدّل النص قبل الإرسال:</div>
     <textarea id="rText"></textarea>
@@ -344,6 +356,9 @@ const SHOW_COST = true; // سعر الشركه والتكلفة يطلعون د�
 let lastResults = [], shown = 0, lastNote = '';
 const DOVR = new Map();
 const POVR = new Map(); // أسعار كتبتها بيدك — مؤقتة
+const VINC = new Map(); // السعر شامل الضريبة اللي كتبته بيدك بالضبط (مثل 33.00) — مؤقت
+const CQTY = new Map(); // الكمية اللي اخترتها في البطاقة قبل الإضافة — مؤقتة
+let TOT = null; // المجموع شامل الضريبة اللي كتبته بيدك في صفحة الرد — مؤقت (null = الأصلي)
 let DGAP = +(localStorage.getItem('discGap') || 10);
 
 /* ---------- واجهة عامة ---------- */
@@ -495,7 +510,7 @@ function card(r, open){
   const tags = isLexus(r.pn) ? '<span class="tag lx">لكزس</span>' : '';
   const di = discInfo(r);
   let prices = `<div class="pr main" data-pbox="${r.i}"><div class="l">سعر البيع شامل الضريبة</div>
-    <div class="v" data-fin>${di.price ? money(withVat(di.price)) : '—'}</div>
+    <div class="vin"><input data-vin="${r.i}" type="number" inputmode="decimal" step="0.01" min="0" value="${di.price ? fmt2(incOf(r, di.price)) : ''}"><span>ريال</span><span class="h">✏️ اكتب السعر شامل الضريبة</span></div>
     <div class="pin"><span>سعر البيع بدون ضريبة</span><input data-pin="${r.i}" type="number" inputmode="decimal" step="0.01" min="0" value="${di.price ? fmt2(di.price) : ''}"><button class="reset${di.manual || DOVR.has(r.pn) ? '' : ' hidden'}" data-act="reset" data-i="${r.i}">↺ الأصلي</button></div>
     ${di.has ? `<div class="disc"><span>خصم دايركت</span><button data-act="dm" data-i="${r.i}">−</button><input data-din="${r.i}" type="number" inputmode="decimal" step="1" min="0" max="100" value="${di.d}"><b>%</b><button data-act="dp" data-i="${r.i}">+</button></div>
     <div class="s">من سعر الشركه ${money(r.comp)} بدون ضريبة${SHOW_COST ? ` · خصم الشراء (من التكلفة) ${N(di.buy, 2)}%` : ''}</div>` : ''}
@@ -513,25 +528,44 @@ function card(r, open){
     <div class="desc">${r.ar ? `<div>${esc(r.ar)}</div>` : ''}${r.en ? `<div class="en">${esc(r.en)}</div>` : ''}${!r.ar && !r.en ? '<div class="hint" style="margin:0">بدون وصف</div>' : ''}</div>
     <div class="stats">${stockHtml(r)}</div>
     <div class="prices">${prices}</div>
-    <div class="cact"><button class="btn ${inB ? 'added' : ''}" data-act="add" data-i="${r.i}">${addLabel(r, inB)}</button>${altBtn}</div>
+    <div class="cact"><div class="qty cqty"><span>الكمية</span><button data-act="cqm" data-i="${r.i}">−</button><b class="n" data-cqn="${r.i}">${cardQty(r)}</b><button data-act="cqp" data-i="${r.i}">+</button></div><button class="btn ${inB ? 'added' : ''}" data-act="add" data-i="${r.i}">${addLabel(r, inB)}</button>${altBtn}</div>
     <div class="alts hidden" data-alts="${r.i}"></div>
   </div>`;
+}
+function cardQty(r){ const b = BASKET.find(x => x.pn === r.pn); return b ? b.qty : (CQTY.get(r.pn) || 1); }
+// لو كتبت السعر شامل الضريبة، نستخدم رقمك بالضبط (بعض الأرقام مثل 33 ما لها سعر بدون ضريبة بهللات يعطيها بالضبط)
+function incOf(r, net){ const t = VINC.get(r.pn); return t != null && POVR.get(r.pn) === net ? t : withVat(net); }
+function setCardQty(i, d){
+  const r = row(i); const q = Math.max(1, cardQty(r) + d); CQTY.set(r.pn, q);
+  const b = BASKET.find(x => x.pn === r.pn); if (b){ b.qty = q; TOT = null; saveBasket(); }
+  const el = document.querySelector(`[data-cqn="${i}"]`); if (el) el.textContent = q;
+}
+// تكتب السعر شامل الضريبة → نطلع السعر بدون ضريبة اللي يعطي نفس الرقم بالضبط
+function netFromInc(v){
+  v = Math.round((+v || 0) * 100) / 100; if (v <= 0) return 0;
+  const n0 = Math.round(v / (1 + VAT) * 100) / 100;
+  for (const n of [n0, n0 - 0.01, n0 + 0.01]){ const k = Math.round(n * 100) / 100; if (withVat(k) === v) return k; }
+  return n0;
 }
 function profitTxt(r, price){ return r.cost && price ? 'الربح ' + N((price - r.cost) / price * 100, 2) + '%' : ''; }
 function setDisc(i, d){
   const r = row(i); d = Math.max(0, Math.min(100, Math.round(d * 100) / 100 || 0));
-  DOVR.set(r.pn, d); POVR.delete(r.pn); refreshPrice(i);
+  DOVR.set(r.pn, d); POVR.delete(r.pn); VINC.delete(r.pn); refreshPrice(i);
 }
 function setPrice(i, v){
   const r = row(i); v = Math.round((+v || 0) * 100) / 100; if (v < 0) v = 0;
-  POVR.set(r.pn, v); DOVR.delete(r.pn); refreshPrice(i);
+  POVR.set(r.pn, v); DOVR.delete(r.pn); VINC.delete(r.pn); refreshPrice(i);
 }
-function resetPrice(i){ const r = row(i); POVR.delete(r.pn); DOVR.delete(r.pn); refreshPrice(i, true); }
+function setPriceInc(i, v){
+  const r = row(i); v = Math.round((+v || 0) * 100) / 100; if (v < 0) v = 0;
+  const n = netFromInc(v); POVR.set(r.pn, n); DOVR.delete(r.pn); if (v) VINC.set(r.pn, v); else VINC.delete(r.pn); refreshPrice(i);
+}
+function resetPrice(i){ const r = row(i); POVR.delete(r.pn); DOVR.delete(r.pn); VINC.delete(r.pn); refreshPrice(i, true); }
 function refreshPrice(i, force){
   const r = row(i); const di = discInfo(r);
-  const b = BASKET.find(x => x.pn === r.pn); if (b && b.avail){ b.net = di.price || 0; b.price = di.price ? withVat(di.price) : 0; saveBasket(); }
+  const b = BASKET.find(x => x.pn === r.pn); if (b && b.avail){ const np = di.price ? incOf(r, di.price) : 0; if (b.price !== np) TOT = null; b.net = di.price || 0; b.price = np; saveBasket(); }
   const box = document.querySelector(`[data-pbox="${i}"]`); if (!box) return;
-  box.querySelector('[data-fin]').innerHTML = di.price ? money(withVat(di.price)) : '—';
+  const vin = box.querySelector('[data-vin]'); if (force || document.activeElement !== vin) vin.value = di.price ? fmt2(incOf(r, di.price)) : '';
   const pin = box.querySelector('[data-pin]'); if (force || document.activeElement !== pin) pin.value = di.price ? fmt2(di.price) : '';
   const din = box.querySelector('[data-din]'); if (din && (force || document.activeElement !== din)) din.value = di.d;
   box.querySelector('.reset').classList.toggle('hidden', !(di.manual || DOVR.has(r.pn)));
@@ -554,13 +588,36 @@ function toggleBasket(i){
   if (k >= 0) BASKET.splice(k, 1);
   else {
     const di = discInfo(r); const avail = r.q1 + r.q2 > 0;
-    const it = { pn: r.pn, name: basketName(r), avail, net: di.price || 0, price: di.price ? withVat(di.price) : 0, qty: 1, stock: r.q1 + r.q2, elec: isElectrical(r) };
+    const it = { pn: r.pn, name: basketName(r), avail, net: di.price || 0, price: di.price ? incOf(r, di.price) : 0, qty: CQTY.get(r.pn) || 1, stock: r.q1 + r.q2, elec: isElectrical(r) };
     if (!avail){ it.order = ''; it.base = r.comp || r.sell; it.baseIsComp = r.comp > 0; it.odisc = ORDER_DISC; it.price = orderPrice(it); }
     BASKET.push(it);
   }
-  saveBasket(); renderBasketBar();
+  TOT = null; saveBasket(); renderBasketBar();
 }
-function saveBasket(){ try { sessionStorage.setItem('basket', JSON.stringify(BASKET)); } catch(e){} }
+function saveBasket(){ try { sessionStorage.setItem('basket', JSON.stringify(BASKET)); sessionStorage.setItem('basketTot', TOT == null ? '' : String(TOT)); } catch(e){} }
+
+/* المجموع اللي تكتبه بيدك: الفرق يتوزع على القطع بالنسبة (مثل نظام المحل)، وهللات التقريب على أغلى قطعة كميتها ١ */
+const r2 = v => Math.round(v * 100) / 100;
+function pricedItems(){ return BASKET.filter(b => (b.avail || isOrder(b)) && b.price); }
+function origTotal(){ return r2(pricedItems().reduce((s, b) => s + r2(b.price * b.qty), 0)); }
+function effPrices(){
+  const E = new Map(); const items = pricedItems();
+  for (const b of BASKET) E.set(b, { unit: b.price || 0, net: b.net || 0 });
+  const orig = origTotal();
+  if (TOT == null || !(TOT > 0) || !orig || Math.abs(TOT - orig) < 0.005) return E;
+  const f = TOT / orig;
+  const unit = new Map(items.map(b => [b, r2(b.price * f)]));
+  const sum = () => r2(items.reduce((s, b) => s + r2(unit.get(b) * b.qty), 0));
+  let rem = r2(TOT - sum());
+  if (rem){
+    const ones = items.filter(b => b.qty === 1).sort((a, b) => unit.get(b) - unit.get(a));
+    const tgt = ones[0] || items.filter(b => Math.round(rem * 100) % b.qty === 0).sort((a, b) => unit.get(b) - unit.get(a))[0];
+    if (tgt) unit.set(tgt, r2(unit.get(tgt) + (tgt.qty === 1 ? rem : rem / tgt.qty)));
+  }
+  for (const b of items){ const u = unit.get(b); E.set(b, { unit: u, net: netFromInc(u) }); }
+  return E;
+}
+function bRow(b){ if (!CAT) return null; const j = exactIdx(b.pn); return j >= 0 ? row(j) : null; }
 function renderBasketBar(){ $('rCount').textContent = BASKET.length; $('rbar').classList.toggle('hidden', !BASKET.length || $('vSearch').classList.contains('hidden')); }
 let SHOW_PN = false; // رقم القطعة ما يظهر للزبون إلا إذا اخترت
 const ORDER_DISC = 20; // خصم الطلبية الافتراضي ٪ من سعر الشركه دايم (بدون ضريبة)، وإذا القطعة ما لها سعر شركه فمن سعر البيع
@@ -586,7 +643,9 @@ function isOrder(b){ return !b.avail && b.order !== 'none'; } // '' = طلبية
 function replyText(){
   const L = ['السلام عليكم ورحمة الله وبركاته', ''];
   let total = 0, priced = 0, orders = 0, japan = false;
+  const E = effPrices();
   for (const b of BASKET){
+    const unit = E.get(b).unit;
     let name = (b.name || '').trim();
     if (!SHOW_PN && !b.nameEdited) name = name.replace(/\S*\d{4,}-[A-Z0-9]{3,}\S*/gi, ' ').replace(/\s{2,}/g, ' ').trim();
     if (!SHOW_PN && !name) name = 'قطعة غيار';
@@ -594,9 +653,9 @@ function replyText(){
     if (name) L.push(SHOW_PN ? name : `🔹 ${name}`);
     const priceLine = (head) => {
       const pre = head ? head + ' — ' : '💵 ';
-      if (!b.price) return `${pre}الكمية ${b.qty}`;
-      const line = Math.round(b.price * b.qty * 100) / 100; total += line; priced++;
-      return b.qty > 1 ? `${pre}الكمية ${b.qty} × ${fmt2(b.price)} = ${fmt2(line)} ريال شامل الضريبة` : `${pre}السعر ${fmt2(b.price)} ريال شامل الضريبة`;
+      if (!unit) return `${pre}الكمية ${b.qty}`;
+      const line = Math.round(unit * b.qty * 100) / 100; total += line; priced++;
+      return b.qty > 1 ? `${pre}الكمية ${b.qty} × ${fmt2(unit)} = ${fmt2(line)} ريال شامل الضريبة` : `${pre}السعر ${fmt2(unit)} ريال شامل الضريبة`;
     };
     if (b.avail) L.push(priceLine('✅ متوفرة'));
     else if (isOrder(b)){
@@ -617,11 +676,15 @@ function replyText(){
   L.push('الموسى لقطع غيار تويوتا ولكزس وديهاتسو');
   return L.join('\n');
 }
-function openSheet(){
+function openSheet(){ renderItems(); renderTot(true); $('rShowPn').checked = SHOW_PN; $('rText').value = replyText(); $('rSheet').classList.remove('hidden'); }
+function renderItems(){
+  const E = effPrices();
   $('rItems').innerHTML = BASKET.map((b, k) => {
     const over = b.avail && b.stock != null && b.qty > b.stock;
+    const u = E.get(b).unit, changed = b.price && Math.abs(u - b.price) >= 0.005;
+    const rr = changed ? bRow(b) : null, belowMin = rr && rr.min && E.get(b).net < rr.min;
     const qtyBox = (b.avail || isOrder(b)) ? `<div class="qty"><button data-qm="${k}">−</button><b class="n">${b.qty}</b><button data-qp="${k}">+</button></div>
-      <div class="lt">${b.price ? fmt2(b.price * b.qty) : '—'}</div>` : '';
+      <div class="lt">${changed ? `<div class="old">${fmt2(b.price * b.qty)}</div>` : ''}${u ? fmt2(u * b.qty) : '—'}</div>` : '';
     const orderBox = !b.avail ? `<div class="obox">
         <select data-otype="${k}" class="${b.order ? '' : 'need'}"><option value=""${b.order ? '' : ' selected'} disabled>اختر نوع الطلب…</option>${Object.entries(ORDER_TYPES).map(([v, t]) => `<option value="${v}"${b.order === v ? ' selected' : ''}>📦 ${t.label}</option>`).join('')}</select>
         ${isOrder(b) ? `<div class="disc"><span>خصم الطلبية</span><button data-om="${k}">−</button><input data-odisc="${k}" type="number" inputmode="decimal" value="${b.odisc}"><b>%</b><button data-op="${k}">+</button></div>
@@ -631,14 +694,37 @@ function openSheet(){
       <div class="bi-row"><div class="bi-h"><span>${b.avail ? '✅' : (isOrder(b) ? '📦' : '❌')}</span><span class="pn" style="font-size:14px">${esc(b.pn)}</span></div><button class="x" data-rm="${k}">حذف</button></div>
       <input class="nm${(b.name || '').trim() ? '' : ' empty'}" data-nm="${k}" type="text" dir="auto" value="${esc(b.name || '')}" placeholder="اكتب اسم القطعة">
       ${over ? `<div class="warn">⚠️ المتوفر ${b.stock} بس</div>` : ''}
+      ${belowMin ? `<div class="warn">⚠️ السعر بعد تعديل المجموع أقل من أدنى سعر (${fmt2(withVat(rr.min))} شامل الضريبة)</div>` : ''}
       ${(b.avail || isOrder(b)) ? `<div class="bi-row bi-q">${`<label class="elec"><input type="checkbox" data-elec="${k}"${b.elec ? ' checked' : ''}> ⚡ كهربائية</label>`}<span style="flex:1"></span>${qtyBox}</div>` : ''}
       ${orderBox}</div>`;
   }).join('');
-  $('rShowPn').checked = SHOW_PN;
-  $('rText').value = replyText();
-  $('rSheet').classList.remove('hidden');
 }
-function setOrderDisc(k, d){ const b = BASKET[k]; b.odisc = Math.max(0, Math.min(100, Math.round((+d || 0) * 100) / 100)); b.price = orderPrice(b); saveBasket(); }
+function renderTot(withInput){
+  const orig = origTotal(), box = $('rTot');
+  if (!orig){ box.innerHTML = ''; return; }
+  const E = effPrices(), on = TOT != null && TOT > 0 && Math.abs(TOT - orig) >= 0.005;
+  const cur = r2(pricedItems().reduce((s, b) => s + r2(E.get(b).unit * b.qty), 0));
+  const av = BASKET.filter(b => b.avail && b.price);
+  let cost = 0, net = 0, noCost = 0;
+  for (const b of av){ const rr = bRow(b); if (!rr || !rr.cost){ noCost++; continue; } cost += rr.cost * b.qty; net += E.get(b).net * b.qty; }
+  cost = r2(cost); net = r2(net);
+  const hasOrd = BASKET.some(b => isOrder(b) && b.price);
+  const diff = r2(orig - cur), pct = orig ? Math.abs(diff) / orig * 100 : 0;
+  const note = [hasOrd ? 'بدون الطلبيات' : '', noCost ? `${noCost} قطعة ما لها تكلفة بالنظام` : ''].filter(Boolean).join(' · ');
+  if (withInput || !box.querySelector('#rTotIn')){
+    box.innerHTML = `<div class="pr main rtot">
+      <div class="l">المجموع شامل الضريبة</div>
+      <div class="vin"><input id="rTotIn" type="number" inputmode="decimal" step="0.01" min="0" value="${fmt2(on ? TOT : orig)}"><span>ريال</span><button class="reset${on ? '' : ' hidden'}" id="rTotReset">↺ الأصلي</button></div>
+      <div data-tinfo></div></div>`;
+  }
+  box.querySelector('#rTotReset').classList.toggle('hidden', !on);
+  box.querySelector('[data-tinfo]').innerHTML = `
+    ${on ? `<div class="s" style="margin-top:4px">قبل التعديل ${money(orig)} · ${diff >= 0 ? 'الخصم' : 'الزيادة'} ${money(Math.abs(diff))} (${N(pct, 2)}%) — وزّعته على القطع بالنسبة</div>` : ''}
+    ${on && Math.abs(cur - TOT) >= 0.005 ? `<div class="warn">أقرب مجموع ممكن بالكميات الحالية: ${money(cur)}</div>` : ''}
+    ${av.length ? `<div class="cp"><span><span>التكلفة للقطع كاملة (بدون ضريبة)</span> <b>${money(cost)}</b></span>${net ? `<span><span>الربح</span> <b>${money(net - cost)}</b> <span>(${N((net - cost) / net * 100, 2)}%)</span></span>` : ''}</div>
+    <div class="s" style="margin-top:2px">الربح = المجموع بدون ضريبة للقطع المتوفرة ${money(net)} − التكلفة${note ? ' · ' + note : ''}</div>` : ''}`;
+}
+function setOrderDisc(k, d){ const b = BASKET[k]; b.odisc = Math.max(0, Math.min(100, Math.round((+d || 0) * 100) / 100)); b.price = orderPrice(b); TOT = null; saveBasket(); }
 function waPhone(p){ p = (p || '').replace(/\D/g, ''); if (/^05\d{8}$/.test(p)) return '966' + p.slice(1); if (/^5\d{8}$/.test(p)) return '966' + p; if (/^9665\d{8}$/.test(p)) return p; if (/^009665\d{8}$/.test(p)) return p.slice(2); return ''; }
 
 /* ---------- Firebase ---------- */
@@ -790,8 +876,9 @@ function loadImg(src){ return new Promise((res, rej) => { const i = new Image();
 function ymd(d){ return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
 function quoteLines(){
   // القطع اللي تدخل العرض: المتوفر + الطلبيات (اللي "بدون طلبية" ما تدخل)
+  const E = effPrices();
   return BASKET.filter(b => b.avail || isOrder(b)).map(b => {
-    const net = b.net || 0, unit = b.price || 0;
+    const net = E.get(b).net || 0, unit = E.get(b).unit || 0;
     let name = (b.name || '').trim();
     if (!SHOW_PN && !b.nameEdited) name = name.replace(/\S*\d{4,}-[A-Z0-9]{3,}\S*/gi, ' ').replace(/\s{2,}/g, ' ').trim();
     if (!SHOW_PN && !name) name = 'قطعة غيار';
@@ -964,6 +1051,7 @@ $('results').addEventListener('click', async e => {
   else if (act === 'alts'){ const box = document.querySelector(`[data-alts="${b.dataset.i}"]`); if (box.classList.contains('hidden') && !box.innerHTML) box.innerHTML = altsHtml(row(+b.dataset.i)); box.classList.toggle('hidden'); }
   else if (act === 'dm' || act === 'dp'){ const i = +b.dataset.i; const cur = +document.querySelector(`[data-din="${i}"]`).value || 0; setDisc(i, act === 'dp' ? Math.floor(cur) + 1 : Math.ceil(cur) - 1); }
   else if (act === 'reset'){ resetPrice(+b.dataset.i); }
+  else if (act === 'cqm' || act === 'cqp'){ setCardQty(+b.dataset.i, act === 'cqp' ? 1 : -1); }
   else if (act === 'go'){ $('q').value = b.dataset.pn; doSearch(b.dataset.pn); window.scrollTo({ top: 0 }); }
   else if (b.id === 'moreBtn'){ more(); }
 });
@@ -971,8 +1059,9 @@ $('results').addEventListener('click', e => { if (e.target.id === 'moreBtn') mor
 $('results').addEventListener('input', e => {
   const i = e.target.dataset.din; if (i != null && e.target.value !== '') return setDisc(+i, +e.target.value);
   const j = e.target.dataset.pin; if (j != null && e.target.value !== '') return setPrice(+j, +e.target.value);
+  const v = e.target.dataset.vin; if (v != null && e.target.value !== '') return setPriceInc(+v, e.target.value);
 });
-$('results').addEventListener('change', e => { const j = e.target.dataset.pin; if (j != null) refreshPrice(+j, true); const i = e.target.dataset.din; if (i != null) refreshPrice(+i, true); });
+$('results').addEventListener('change', e => { const j = e.target.dataset.pin ?? e.target.dataset.vin; if (j != null) refreshPrice(+j, true); const i = e.target.dataset.din; if (i != null) refreshPrice(+i, true); });
 
 $('menuBtn').onclick = e => { e.stopPropagation(); $('menu').classList.toggle('hidden'); };
 document.addEventListener('click', () => $('menu').classList.add('hidden'));
@@ -995,20 +1084,27 @@ $('rItems').addEventListener('input', e => {
 });
 $('rItems').addEventListener('change', e => {
   const el = e.target.dataset.elec; if (el != null){ BASKET[+el].elec = e.target.checked; saveBasket(); $('rText').value = replyText(); return; }
-  const t = e.target.dataset.otype; if (t != null){ BASKET[+t].order = e.target.value; saveBasket(); openSheet(); return; }
+  const t = e.target.dataset.otype; if (t != null){ BASKET[+t].order = e.target.value; TOT = null; saveBasket(); openSheet(); return; }
   const o = e.target.dataset.odisc; if (o != null){ setOrderDisc(+o, e.target.value); openSheet(); }
 });
+$('rTot').addEventListener('input', e => {
+  if (e.target.id !== 'rTotIn' || e.target.value === '') return;
+  const v = r2(+e.target.value); TOT = v > 0 ? v : null; saveBasket();
+  renderItems(); renderTot(false); $('rText').value = replyText();
+});
+$('rTot').addEventListener('change', e => { if (e.target.id === 'rTotIn'){ if (e.target.value === '') TOT = null; saveBasket(); renderTot(true); } });
+$('rTot').addEventListener('click', e => { if (e.target.id === 'rTotReset'){ TOT = null; saveBasket(); renderItems(); renderTot(true); $('rText').value = replyText(); } });
 $('rSheet').onclick = e => { if (e.target.id === 'rSheet') $('rSheet').classList.add('hidden'); };
 $('rItems').onclick = e => {
   const qm = e.target.dataset.qm, qp = e.target.dataset.qp;
   const om = e.target.dataset.om, op = e.target.dataset.op;
   if (om != null || op != null){ const k = +(om ?? op); setOrderDisc(k, Math.round(BASKET[k].odisc) + (op != null ? 1 : -1)); openSheet(); return; }
-  if (qm != null || qp != null){ const b = BASKET[+(qm ?? qp)]; b.qty = Math.max(1, (b.qty || 1) + (qp != null ? 1 : -1)); saveBasket(); openSheet(); return; }
-  const k = e.target.dataset.rm; if (k == null) return; BASKET.splice(+k, 1); saveBasket(); renderBasketBar(); if (!BASKET.length){ $('rSheet').classList.add('hidden'); } else openSheet(); if ($('q').value.trim()) doSearch($('q').value); };
+  if (qm != null || qp != null){ const b = BASKET[+(qm ?? qp)]; b.qty = Math.max(1, (b.qty || 1) + (qp != null ? 1 : -1)); CQTY.set(b.pn, b.qty); TOT = null; saveBasket(); openSheet(); if ($('q').value.trim()) doSearch($('q').value); return; }
+  const k = e.target.dataset.rm; if (k == null) return; BASKET.splice(+k, 1); TOT = null; saveBasket(); renderBasketBar(); if (!BASKET.length){ $('rSheet').classList.add('hidden'); } else openSheet(); if ($('q').value.trim()) doSearch($('q').value); };
 const needType = () => { if (BASKET.some(b => !b.avail && !b.order)){ toast('اختر نوع الطلب لكل طلبية أول'); return true; } return false; };
 $('rCopy').onclick = async () => { if (needType()) return; if (await copyText($('rText').value)) toast('تم النسخ — الصقه في محادثة الزبون'); };
 $('rWa').onclick = () => { if (needType()) return; const p = waPhone($('rPhone').value); if ($('rPhone').value.trim() && !p){ toast('رقم الجوال غير صحيح'); return; } window.open(`https://wa.me/${p}?text=${encodeURIComponent($('rText').value)}`, '_blank'); };
-$('rClear').onclick = () => { BASKET = []; saveBasket(); renderBasketBar(); $('rSheet').classList.add('hidden'); if ($('q').value.trim()) doSearch($('q').value); };
+$('rClear').onclick = () => { BASKET = []; TOT = null; saveBasket(); renderBasketBar(); $('rSheet').classList.add('hidden'); if ($('q').value.trim()) doSearch($('q').value); };
 $('loginForm').addEventListener('submit', async e => {
   e.preventDefault(); $('lErr').textContent = ''; $('lBtn').disabled = true;
   try { await FB.a.signInWithEmailAndPassword(auth, $('lEmail').value.trim(), $('lPass').value); }
@@ -1021,6 +1117,7 @@ $('lReset').onclick = async () => {
 };
 
 /* ---------- البداية ---------- */
+try { const t = +sessionStorage.getItem('basketTot'); TOT = t > 0 ? t : null; } catch(e){}
 try { BASKET = JSON.parse(sessionStorage.getItem('basket') || '[]'); BASKET.forEach(b => { if (!b.qty) b.qty = 1; if (b.net == null && b.price) b.net = Math.round(b.price / 1.15 * 100) / 100; }); } catch(e){ BASKET = []; }
 async function start(){
   if (DEMO){ USER = { email: 'demo', admin: true }; return openCatalog(false).catch(e => banner(esc(e.message))); }
