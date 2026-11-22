@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#25282a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="قطع الموسى">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<title>قطع غيار الموسى</title>
+<style>
+/* هوية الموسى (دليل الهوية ص6–7): رئيسية Pantone 420/422/424/426 C + 7534/7535/7536 C ، مساعد 485 C للإنارة الخفيفة */
+:root{
+  --p420:#c7c9c7; --p422:#9ea2a2; --p424:#707372; --p426:#25282a;
+  --p7534:#d1ccbd; --p7535:#b7b09c; --p7536:#a69f88; --p485:#da291c;
+  --bg:#e9eae9; --card:#ffffff; --ink:#25282a; --muted:#5f6263; --line:#c7c9c7; --chip:#e1e2e1;
+  --brand:#25282a; --brand2:#25282a; --brand-fg:#ecedec; --red:#da291c; --gold:#a69f88;
+  --ok:#2e6b4a; --okbg:#e2efe7; --no:#b3261e; --nobg:#fbe8e5; --warn:#8a4b00; --warnbg:#fdf0dc;
+  --main-bg:#f3f1eb; --main-line:#a69f88; --cost-bg:#f1f1f0; --toast:#25282a;
+  --font-ui:Arial,"Helvetica Neue",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
+  --font-black:"Arial Black",Arial,"Helvetica Neue",sans-serif;
+  --font-mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#1a1c1e; --card:#25282a; --ink:#ecedec; --muted:#9ea2a2; --line:#3e4245; --chip:#313437;
+  --brand:#111314; --brand2:#d6d8d6; --brand-fg:#ecedec; --red:#e2463a; --gold:#b7b09c;
+  --ok:#8fd1ad; --okbg:#1c3328; --no:#ff8a80; --nobg:#3d1a17; --warn:#fbc98a; --warnbg:#3a2a12;
+  --main-bg:#2b2a26; --main-line:#b7b09c; --cost-bg:#2c2f31; --toast:#ecedec; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.5}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+bdi.n{font-variant-numeric:tabular-nums}
+header{position:sticky;top:0;z-index:20;background:var(--brand);color:var(--brand-fg);padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;border-bottom:4px solid var(--red)}
+.hlogo{height:44px;width:auto;flex:none}
+.hrow{display:flex;align-items:center;gap:8px}
+.htitle{font-weight:700;font-size:19px;line-height:1.2}
+.hsub{font-size:12.5px;color:var(--p420);margin-top:4px}
+.htag{height:10px;width:auto;display:block;margin-top:5px}
+.ibtn{background:transparent;border:1px solid #5a5e61;color:var(--brand-fg);border-radius:10px;padding:7px 10px;font-size:14px}
+.ibtn.on{background:var(--card);color:var(--brand)}
+.wrap{max-width:760px;margin:0 auto;padding:12px 12px 120px}
+.banner{background:var(--warnbg);color:var(--warn);border-radius:12px;padding:9px 12px;margin-bottom:10px;font-size:14px}
+.sbox{display:flex;gap:8px;position:sticky;top:calc(env(safe-area-inset-top) + 62px);z-index:10;background:var(--bg);padding:6px 0 10px}
+.sbox input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;font-size:17px;background:var(--card)}
+.sbox input:focus{outline:none;border-color:var(--brand2)}
+.btn{border:0;border-radius:12px;padding:11px 16px;background:var(--brand2);color:var(--card);font-weight:600}
+.btn.sec{background:var(--chip);color:var(--ink)}
+.btn.danger{background:var(--nobg);color:var(--no)}
+.btn:disabled{opacity:.5}
+.hint{color:var(--muted);font-size:14px;margin:4px 2px 10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.ctop{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pn{font-family:var(--font-black);font-weight:900;font-size:18px;letter-spacing:.3px;direction:ltr;unicode-bidi:isolate}
+.tag{font-size:12px;border-radius:999px;padding:2px 8px;background:var(--chip);color:var(--ink)}
+.tag.lx{background:#1d1d1f;color:#fff}
+.copy{margin-inline-start:auto;border:1px solid var(--line);background:var(--card);border-radius:9px;padding:4px 9px;font-size:13px;color:var(--ink)}
+.desc{margin-top:4px;font-size:15px}
+.desc .en{direction:ltr;text-align:right;color:var(--muted);font-size:13.5px}
+.stats{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.st{border-radius:10px;padding:5px 9px;font-size:14px;background:var(--chip)}
+.st.ok{background:var(--okbg);color:var(--ok);font-weight:700}
+.st.no{background:var(--nobg);color:var(--no);font-weight:700}
+.prices{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px;margin-top:9px}
+.pr{border:1px solid var(--line);border-radius:10px;padding:6px 9px;background:var(--cost-bg)}
+.pr .l{font-size:12px;color:var(--muted)}
+.pr .v{font-weight:700;font-size:17px}
+.pr .s{font-size:12px;color:var(--muted)}
+.pr.main{border-color:var(--main-line);background:var(--main-bg)}
+.pr.cost{background:var(--cost-bg)}
+.disc{display:flex;align-items:center;gap:6px;margin:8px 0 2px;font-size:14px;flex-wrap:wrap}
+.pin{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:14px;flex-wrap:wrap}
+.pin span{color:var(--muted)}
+.pin input{width:110px;text-align:center;border:1.5px solid var(--main-line);border-radius:9px;padding:5px;font-size:16px;direction:ltr;background:var(--card);color:var(--ink)}
+.reset{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:4px 9px;font-size:13px}
+.warn{margin-top:6px;background:var(--nobg);color:var(--no);border-radius:8px;padding:4px 8px;font-size:13.5px;font-weight:600}
+.disc span{color:var(--ink);font-weight:600}
+.disc button{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--card);font-size:18px;line-height:1;color:var(--ink)}
+.disc input{width:90px;text-align:center;border:1.5px solid var(--main-line);background:var(--card);color:var(--ink);border-radius:9px;padding:5px;font-size:16px;direction:ltr}
+.prices{grid-template-columns:1fr 1fr}.pr.main{grid-column:1/-1}
+.cact{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.cact .btn{padding:8px 12px;font-size:14.5px}
+.btn.added{background:var(--ok);color:var(--card)}
+.alts{margin-top:8px;border-top:1px dashed var(--line);padding-top:8px}
+.altrow{display:flex;align-items:center;gap:8px;padding:6px 4px;border-radius:8px;font-size:14px}
+.altrow:active{background:var(--chip)}
+.altrow .pn{font-size:14.5px;font-weight:600}
+.altrow .q{margin-inline-start:auto}
+.via{font-size:13px;color:var(--warn);background:var(--warnbg);border-radius:8px;padding:3px 8px;margin-top:6px;display:inline-block}
+.more{display:block;width:100%;margin:6px 0 14px}
+.center{text-align:center}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin:24px auto;max-width:420px}
+.box h2{margin:0 0 12px;font-size:20px}
+.fld{display:block;margin-bottom:12px}
+.fld span{display:block;font-size:14px;color:var(--muted);margin-bottom:4px}
+.fld input{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;font-size:16px;direction:ltr;text-align:left}
+.err{color:var(--no);font-size:14px;min-height:20px;margin:6px 0}
+.bar{height:10px;background:var(--chip);border-radius:99px;overflow:hidden;margin:10px 0}
+.bar i{display:block;height:100%;width:0;background:var(--brand2);transition:width .2s}
+.rbar{position:fixed;inset-inline:0;bottom:0;z-index:30;padding:10px 12px calc(env(safe-area-inset-bottom) + 10px);background:var(--card);border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;justify-content:center}
+.rbar .btn{flex:1;max-width:360px}
+.sheet{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.35);display:flex;align-items:flex-end;justify-content:center}
+.sheet .in{background:var(--card);width:100%;max-width:760px;border-radius:18px 18px 0 0;padding:14px 14px calc(env(safe-area-inset-bottom) + 14px);max-height:92vh;overflow:auto}
+.sheet textarea{width:100%;min-height:240px;border:1.5px solid var(--line);border-radius:12px;padding:10px;font-size:16px;line-height:1.6}
+.sheet .ph{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:10px;font-size:16px;direction:ltr;text-align:left;margin:8px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row .btn{flex:1}
+.bi{border-bottom:1px solid var(--line);padding:8px 0;font-size:14.5px}
+.bi-row{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.bi-q{margin-top:6px}
+.bi-q .elec{margin-top:0}
+.obox{margin-top:6px;background:var(--main-bg);border:1px solid var(--main-line);border-radius:10px;padding:8px}
+.obox select.need{border:2px solid var(--p485);color:var(--no)}
+.obox select{width:100%;font-size:15px;padding:7px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+.bi-t{flex:1;min-width:0}
+.nm{width:100%;margin-top:4px;border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:15px;background:var(--card);color:var(--ink)}
+.nm.empty{border:2px solid var(--p485)}
+.bi-h{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:17px}
+.qty b{min-width:22px;text-align:center}
+.lt{min-width:64px;text-align:left;font-weight:700;direction:ltr}
+.elec{display:inline-flex;align-items:center;gap:5px;font-size:13.5px;margin-top:4px;color:var(--warn)}
+.elec input{width:17px;height:17px}
+.chk{display:flex;align-items:center;gap:8px;margin:10px 0 2px;font-size:15px}
+.chk input{width:20px;height:20px}
+.bi .x{margin-inline-start:auto;border:0;background:var(--nobg);color:var(--no);border-radius:8px;padding:3px 9px}
+.menu{position:absolute;top:100%;inset-inline-end:10px;background:var(--card);color:var(--ink);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.18);overflow:hidden;min-width:200px}
+.menu button{display:block;width:100%;text-align:right;background:var(--card);border:0;padding:12px 14px;font-size:15px;border-bottom:1px solid var(--line)}
+.files li{margin:4px 0}
+.ok{color:var(--ok)} .no{color:var(--no)}
+table.sum{width:100%;border-collapse:collapse;margin:10px 0;font-size:15px}
+table.sum td{border-bottom:1px solid var(--line);padding:7px 4px}
+table.sum td:last-child{text-align:left;font-weight:700}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--toast);color:var(--bg);padding:9px 16px;border-radius:999px;z-index:60;font-size:14.5px}
+footer{color:var(--muted);font-size:12.5px;text-align:center;margin-top:24px}
+</style>
+</head>
+<body>
+<header id="hdr">
+  <div class="hrow" style="position:relative">
+    <img class="hlogo" src="logo-white.png" alt="الموسى">
+    <div style="flex:1"><div class="htitle">قطع غيار الموسى</div><img class="htag" src="genuine-parts.png" alt="GENUINE PARTS"></div>
+    <button class="ibtn hidden" id="menuBtn">☰</button>
+    <div class="menu hidden" id="menu">
+      <button id="mSearch">🔎 البحث</button>
+      <button id="mUpdate">⬆️ تحديث البيانات من النظام</button>
+      <button id="mReload">🔄 إعادة تحميل البيانات</button>
+      <button id="mLogout">🚪 تسجيل خروج</button>
+    </div>
+  </div>
+  <div class="hsub" id="hsub"></div>
+</header>
+
+<div class="wrap">
+  <div class="banner hidden" id="banner"></div>
+
+  <!-- تسجيل الدخول -->
+  <section id="vLogin" class="hidden">
+    <div class="box">
+      <h2>تسجيل الدخول</h2>
+      <form id="loginForm">
+        <label class="fld"><span>الإيميل</span><input id="lEmail" type="email" autocomplete="username" required></label>
+        <label class="fld"><span>كلمة المرور</span><input id="lPass" type="password" autocomplete="current-password" required></label>
+        <div class="err" id="lErr"></div>
+        <button class="btn" style="width:100%" id="lBtn">دخول</button>
+      </form>
+      <button class="btn sec" style="width:100%;margin-top:8px" id="lReset">نسيت كلمة المرور</button>
+    </div>
+  </section>
+
+  <!-- تحميل -->
+  <section id="vLoading" class="hidden">
+    <div class="box center">
+      <div id="ldMsg">جاري التحميل…</div>
+      <div class="bar"><i id="ldBar"></i></div>
+      <div class="hint" id="ldSub"></div>
+    </div>
+  </section>
+
+  <!-- البحث -->
+  <section id="vSearch" class="hidden">
+    <form class="sbox" id="sForm">
+      <input id="q" type="search" dir="auto" inputmode="search" autocomplete="off" placeholder="رقم القطعة أو الوصف (مثال: 04465 أو فحمات كامري)">
+      <button class="btn" id="sBtn">بحث</button>
+    </form>
+    <div class="hint" id="sInfo">اكتب رقم القطعة بأي شكل (بشرطة أو بدونها)، أو كلمات من الوصف بالعربي أو الإنجليزي. قطع لكزس تنبحث تلقائياً بحرف X.</div>
+    <div id="results"></div>
+  </section>
+
+  <!-- التحديث -->
+  <section id="vUpdate" class="hidden">
+    <div class="box" style="max-width:640px">
+      <h2>تحديث البيانات من نظام المحل</h2>
+      <ol style="padding-inline-start:20px;margin-top:0">
+        <li>افتح ملف <b>الموسى تويوتا.LZH</b> بـ WinRAR واستخرجه في مجلد.</li>
+        <li>اضغط «اختيار الملفات» واختر هذي الثلاثة مع بعض (Ctrl + ضغطة):<br>
+          <bdi dir="ltr">IMISZZZZ.DBF</bdi> · <bdi dir="ltr">IMIDZZZZ.DBF</bdi> · <bdi dir="ltr">ALTER.DBF</bdi></li>
+        <li>بعد ما يقراها ويطلع الملخص، اضغط «ارفع للموقع».</li>
+      </ol>
+      <input type="file" id="uFiles" multiple accept=".dbf,.DBF">
+      <ul class="files" id="uList"></ul>
+      <button class="btn" id="uRead" disabled>اقرأ الملفات</button>
+      <div class="bar hidden" id="uBarW"><i id="uBar"></i></div>
+      <div class="hint" id="uMsg"></div>
+      <div id="uSum"></div>
+      <div class="row">
+        <button class="btn hidden" id="uUpload">ارفع للموقع</button>
+        <button class="btn sec" id="uBack">رجوع للبحث</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>إعداد: أسامة</footer>
+</div>
+
+<!-- شريط الرد -->
+<div class="rbar hidden" id="rbar">
+  <button class="btn" id="rOpen">💬 الرد على الزبون (<bdi class="n" id="rCount">0</bdi>)</button>
+</div>
+<div class="sheet hidden" id="rSheet">
+  <div class="in">
+    <div style="display:flex;align-items:center;margin-bottom:6px"><b style="flex:1">الرد على الزبون</b><button class="btn sec" id="rClose" style="padding:6px 12px">إغلاق</button></div>
+    <div id="rItems"></div>
+    <label class="chk"><input type="checkbox" id="rShowPn"> إظهار رقم القطعة للزبون</label>
+    <div class="hint" style="margin-top:8px">تقدر تعدّل النص قبل الإرسال:</div>
+    <textarea id="rText"></textarea>
+    <input class="ph" id="rPhone" type="tel" inputmode="tel" placeholder="رقم الزبون (اختياري)">
+    <input class="ph" id="rCust" type="text" placeholder="اسم العميل لعرض السعر (اختياري)" style="direction:rtl;text-align:right">
+    <div class="row">
+      <button class="btn" id="rCopy">📋 نسخ</button>
+      <button class="btn" id="rWa">💬 واتساب</button>
+    </div>
+    <button class="btn" id="rPdf" style="width:100%;margin-top:8px">📄 عرض سعر PDF</button>
+    <button class="btn danger" id="rClear" style="width:100%;margin-top:8px">مسح القائمة</button>
+  </div>
+</div>
+<div class="toast hidden" id="toast"></div>
+
+<script src="config.js"></script>
+<script>
+/*BUILDER-START*/
+// يقرأ ملفات نظام الدوس (DBF) ويطلع منها كتالوج القطع
+const AR_MAP = {0x80:'ء',0x81:'آ',0x82:'أ',0x83:'و',0x84:'إ',0x85:'ئ',0x86:'ا',0x87:'ب',0x88:'ة',0x89:'ت',0x8a:'ث',0x8b:'ث',0x8c:'ج',0x8d:'',0x8e:'ح',0x8f:'خ',0x90:'د',0x91:'ذ',0x92:'ر',0x93:'ز',0x94:'س',0x95:'ش',0x96:'ص',0x97:'ض',0x98:'ط',0x99:'ظ',0x9a:'ع',0x9b:'غ',0x9c:'ف',0x9d:'ق',0x9e:'ك',0x9f:'ل',0xa0:'م',0xa1:'ن',0xa2:'ه',0xa3:'و',0xa4:'ى',0xa5:'ي',0xa6:''};
+const DEC = Array.from({length:256}, (_, i) => i < 32 ? ' ' : i < 128 ? String.fromCharCode(i) : (AR_MAP[i] ?? ''));
+function decRaw(u8, off, len){ let s=''; for(let i=off;i<off+len;i++) s+=DEC[u8[i]]; return s; }
+function clean(s){ return s.replace(/-{2,}/g,' ').trim(); }
+function num(s){ const v = Number(s.trim()); return Number.isFinite(v) ? v : 0; }
+function fmt(v){ if (!v) return '0'; let s=v.toFixed(2); if (s.includes('.')) s=s.replace(/0+$/,'').replace(/\.$/,''); return s === '-0' ? '0' : s; }
+function normKey(pn){ return pn.toUpperCase().replace(/[^A-Z0-9]/g,''); }
+
+async function readDbf(file, wanted, onRow, onProgress){
+  const head = new Uint8Array(await file.slice(0, 32).arrayBuffer());
+  const dv = new DataView(head.buffer);
+  const n = dv.getUint32(4, true), hlen = dv.getUint16(8, true), rlen = dv.getUint16(10, true);
+  const yy = head[1];
+  const date = `${yy < 80 ? 2000 + yy : 1900 + yy}-${String(head[2]).padStart(2,'0')}-${String(head[3]).padStart(2,'0')}`;
+  const fh = new Uint8Array(await file.slice(32, hlen).arrayBuffer());
+  const fields = {}; let pos = 1;
+  for (let o = 0; o + 32 <= fh.length && fh[o] !== 0x0D; o += 32){
+    let name=''; for (let k=0;k<11&&fh[o+k];k++) name+=String.fromCharCode(fh[o+k]);
+    const len = fh[o+16]; fields[name] = [pos, len]; pos += len;
+  }
+  for (const w of wanted) if (!fields[w]) throw new Error(`الملف ${file.name} ما فيه العمود ${w}`);
+  const per = Math.max(1, Math.floor(8*1024*1024 / rlen));
+  for (let start = 0; start < n; start += per){
+    const cnt = Math.min(per, n - start);
+    const off = hlen + start * rlen;
+    const buf = new Uint8Array(await file.slice(off, off + cnt * rlen).arrayBuffer());
+    const got = Math.floor(buf.length / rlen);
+    for (let r = 0; r < got; r++){
+      const b = r * rlen;
+      if (buf[b] === 0x2A) continue; // سجل محذوف
+      const row = {};
+      for (const w of wanted){ const [p, l] = fields[w]; row[w] = decRaw(buf, b + p, l); }
+      onRow(row);
+    }
+    onProgress && onProgress(Math.min(1, (start + cnt) / n));
+    if (got < cnt) break;
+  }
+  return { n, date };
+}
+
+// files: {imis, imid, alter} — كل واحد File / Blob
+async function buildCatalog(files, progress){
+  const P = (stage, f) => progress && progress(stage, f);
+  const items = new Map();
+  const imis = await readDbf(files.imis, ['FITEMNO','FITEMDESC','FARABDESC','FSELLPRICE','FSELLP3','FCOSTPRICE','FSELLP2','FCOMPCOST','FCOMPDISC','FMINPRICE'], r => {
+    const pn = r.FITEMNO.trim();
+    if (!pn || items.has(pn)) return;
+    items.set(pn, [pn, clean(r.FITEMDESC), clean(r.FARABDESC), num(r.FSELLPRICE), num(r.FSELLP3), num(r.FCOSTPRICE), 0, 0, '', num(r.FSELLP2), num(r.FCOMPCOST), num(r.FCOMPDISC), num(r.FMINPRICE), 0, 0]);
+  }, f => P('الأصناف', f));
+  const imid = await readDbf(files.imid, ['FITEMNO','FBRANCH','FQTYONHAND','FLOCATION','FQTYBOOKED','FQTYORDER'], r => {
+    const it = items.get(r.FITEMNO.trim()); if (!it) return;
+    const br = r.FBRANCH.trim(); const q = Math.trunc(num(r.FQTYONHAND));
+    if (br === '01'){ it[6] = q; it[8] = clean(r.FLOCATION); it[13] = Math.trunc(num(r.FQTYBOOKED)); it[14] = Math.trunc(num(r.FQTYORDER)); }
+    else if (br === '02'){ it[7] = q; }
+  }, f => P('الكميات', f));
+  const alts = new Map();
+  const add = (a, b) => { let l = alts.get(a); if (!l){ l = []; alts.set(a, l); } l.push(b); };
+  const rev = [];
+  await readDbf(files.alter, ['FITEMNO','FALT'], r => {
+    const a = r.FITEMNO.trim(), b = r.FALT.trim();
+    if (a && b){ add(a, b); rev.push(b, a); }
+  }, f => P('البدائل', f));
+  for (let i = 0; i < rev.length; i += 2) add(rev[i], rev[i+1]);
+  P('ترتيب', 0);
+  const rows = [];
+  let inStock = 0;
+  for (const it of items.values()){
+    const al = alts.get(it[0]);
+    let altStr = '';
+    if (al){ const seen = new Set([it[0]]); const out = []; for (const a of al) if (!seen.has(a)){ seen.add(a); out.push(a); } altStr = out.join(' '); }
+    if (it[6] > 0 || it[7] > 0) inStock++;
+    rows.push([normKey(it[0]), it[0], [it[0], it[1], it[2], fmt(it[3]), fmt(it[4]), fmt(it[5]), String(it[6]), it[7] ? String(it[7]) : '', it[8], fmt(it[9]), fmt(it[10]), fmt(it[11]), fmt(it[12]), String(it[13]), String(it[14]), altStr].join('\t')]);
+  }
+  rows.sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : (a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0));
+  P('ترتيب', 1);
+  return { lines: rows.map(r => r[2]), stats: { count: rows.length, inStock, dataDate: imid.date, imisDate: imis.date } };
+}
+/*BUILDER-END*/
+
+/*APP-START*/
+(function(){
+'use strict';
+const VAT = 0.15;
+const FB_VER = '10.14.1';
+const CFG = window.FIREBASE_CONFIG || {};
+const DEMO = !CFG.apiKey || String(CFG.apiKey).startsWith('PASTE');
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const N = (v, d = 0) => '<bdi class="n" dir="ltr">' + Number(v).toLocaleString('en-US', {minimumFractionDigits: d, maximumFractionDigits: d}) + '</bdi>';
+const money = v => N(Math.round(v * 100) / 100, 2);
+const withVat = v => Math.round(Math.round(v * 100) * 115 / 100) / 100; // بالهللات عشان التقريب يكون صح
+let FB = null, auth = null, db = null, USER = null;
+let CAT = null; // {lines, keys, meta}
+let DESC = null;
+let BASKET = [];
+const SHOW_COST = true; // سعر الشركه والتكلفة يطلعون دايم
+let lastResults = [], shown = 0, lastNote = '';
+const DOVR = new Map();
+const POVR = new Map(); // أسعار كتبتها بيدك — مؤقتة
+let DGAP = +(localStorage.getItem('discGap') || 10);
+
+/* ---------- واجهة عامة ---------- */
+const views = ['vLogin','vLoading','vSearch','vUpdate'];
+function show(v){ views.forEach(x => $(x).classList.toggle('hidden', x !== v)); $('rbar').classList.toggle('hidden', v !== 'vSearch' || !BASKET.length); }
+function toast(t){ const el = $('toast'); el.textContent = t; el.classList.remove('hidden'); clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.add('hidden'), 1800); }
+function banner(t){ $('banner').innerHTML = t || ''; $('banner').classList.toggle('hidden', !t); }
+function loading(msg, frac, sub){ show('vLoading'); $('ldMsg').textContent = msg; $('ldBar').style.width = Math.round((frac || 0) * 100) + '%'; $('ldSub').textContent = sub || ''; }
+function setHeaderInfo(){
+  if (!CAT){ $('hsub').textContent = ''; return; }
+  const m = CAT.meta || {};
+  $('hsub').innerHTML = `بيانات النظام: <bdi dir="ltr">${esc(m.dataDate || '—')}</bdi> · ${N(m.count || CAT.lines.length)} قطعة · ${N(m.inStock || 0)} متوفرة`;
+}
+async function copyText(t){
+  try { await navigator.clipboard.writeText(t); return true; } catch(e){}
+  const ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select();
+  let ok = false; try { ok = document.execCommand('copy'); } catch(e){} ta.remove(); return ok;
+}
+
+/* ---------- تخزين على الجهاز ---------- */
+function idb(){ return new Promise((res, rej) => { const r = indexedDB.open('moussa-parts', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+async function idbGet(k){ const d = await idb(); return new Promise((res, rej) => { const t = d.transaction('kv').objectStore('kv').get(k); t.onsuccess = () => res(t.result); t.onerror = () => rej(t.error); }); }
+async function idbSet(k, v){ const d = await idb(); return new Promise((res, rej) => { const t = d.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = () => res(); t.onerror = () => rej(t.error); }); }
+async function idbClear(){ const d = await idb(); return new Promise(res => { const t = d.transaction('kv', 'readwrite'); t.objectStore('kv').clear(); t.oncomplete = () => res(); }); }
+
+/* ---------- ضغط ---------- */
+async function gz(text){ const s = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip')); return new Uint8Array(await new Response(s).arrayBuffer()); }
+async function gunzip(u8){ const s = new Blob([u8]).stream().pipeThrough(new DecompressionStream('gzip')); return await new Response(s).text(); }
+async function makeChunks(lines, onP){
+  const out = []; let i = 0;
+  while (i < lines.length){
+    let n = Math.min(60000, lines.length - i), data;
+    for (;;){ data = await gz(lines.slice(i, i + n).join('\n')); if (data.length <= 900000 || n <= 1000) break; n = Math.floor(n * 0.7); }
+    out.push(data); i += n; onP && onP(i / lines.length);
+  }
+  return out;
+}
+
+/* ---------- الكتالوج في الذاكرة ---------- */
+function loadText(text, meta){
+  const lines = text ? text.split('\n') : [];
+  const keys = new Array(lines.length);
+  for (let i = 0; i < lines.length; i++){ const t = lines[i].indexOf('\t'); keys[i] = normKey(t < 0 ? lines[i] : lines[i].slice(0, t)); }
+  CAT = { lines, keys, meta: meta || {} }; DESC = null;
+  setHeaderInfo();
+}
+function row(i){
+  const p = CAT.lines[i].split('\t');
+  return { i, pn: p[0], en: p[1] || '', ar: p[2] || '', sell: +p[3] || 0, p3: +p[4] || 0, cost: +p[5] || 0, q1: +p[6] || 0, q2: +(p[7] || 0), loc: p[8] || '',
+    p2: +p[9] || 0, comp: +p[10] || 0, disc: +p[11] || 0, min: +p[12] || 0, booked: +p[13] || 0, ordered: +p[14] || 0, alts: p[15] ? p[15].split(' ') : [] };
+}
+function lowerBound(k){ const a = CAT.keys; let lo = 0, hi = a.length; while (lo < hi){ const m = (lo + hi) >> 1; if (a[m] < k) lo = m + 1; else hi = m; } return lo; }
+function prefixIdx(k, limit){ const out = []; const a = CAT.keys; for (let i = lowerBound(k); i < a.length && a[i].startsWith(k) && out.length < limit; i++) out.push(i); return out; }
+function exactIdx(pn){ const k = normKey(pn); const a = CAT.keys; let best = -1; for (let i = lowerBound(k); i < a.length && a[i] === k; i++){ if (best < 0) best = i; if (CAT.lines[i].startsWith(pn + '\t')) return i; } return best; }
+function normAr(s){ return s.toUpperCase().replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/ـ/g,''); }
+function descIndex(){
+  if (DESC) return DESC;
+  DESC = new Array(CAT.lines.length);
+  for (let i = 0; i < CAT.lines.length; i++){
+    const l = CAT.lines[i]; const a = l.indexOf('\t'), b = l.indexOf('\t', a + 1), c = l.indexOf('\t', b + 1);
+    DESC[i] = normAr(l.slice(a + 1, c).replace('\t', ' '));
+  }
+  return DESC;
+}
+const isLexus = pn => /^X\d/i.test(pn);
+const customerNo = pn => isLexus(pn) ? pn.slice(1) : pn;
+
+/* ---------- البحث ---------- */
+function search(qRaw){
+  const q = (qRaw || '').trim();
+  if (!q || !CAT) return [];
+  const k = normKey(q);
+  const hasAr = /[؀-ۿ]/.test(q);
+  let res = [], note = '';
+  if (!hasAr && k.length >= 3 && /\d/.test(k)){
+    const cands = [k];
+    if (k[0] === 'X') cands.push(k.slice(1)); else cands.push('X' + k);
+    const seen = new Set();
+    for (const c of cands) for (const i of prefixIdx(c, 400)) if (!seen.has(i)){ seen.add(i); res.push(i); }
+    const exact = new Set(cands);
+    const rank = i => CAT.keys[i] === k ? 0 : exact.has(CAT.keys[i]) ? 1 : 2; // اللي كتبته بالضبط أول
+    res.sort((a, b) => (rank(a) - rank(b)) || (CAT.keys[a].length - CAT.keys[b].length) || (a - b));
+    if (!res.length){
+      // يمكن الرقم بديل لقطعة ثانية
+      for (let i = 0; i < CAT.lines.length; i++){
+        const l = CAT.lines[i]; const t = l.lastIndexOf('\t'); if (t === l.length - 1) continue;
+        const alts = l.slice(t + 1).split(' ');
+        if (alts.some(a => { const n = normKey(a); return n === k || n === 'X' + k; })) res.push(i);
+        if (res.length >= 200) break;
+      }
+      if (res.length) note = 'الرقم اللي كتبته مو موجود كقطعة، بس هو بديل للقطع هذي:';
+    }
+  }
+  if (!res.length){
+    const toks = normAr(q).split(/\s+/).filter(Boolean);
+    if (toks.length){
+      const D = descIndex();
+      for (let i = 0; i < D.length; i++){ const d = D[i]; let ok = true; for (const t of toks) if (!d.includes(t)){ ok = false; break; } if (ok){ res.push(i); if (res.length >= 3000) break; } }
+      const st = i => { const r = CAT.lines[i].split('\t'); return (+r[6] > 0 || +(r[7] || 0) > 0) ? 0 : 1; };
+      res.sort((a, b) => st(a) - st(b) || a - b);
+      if (res.length) note = 'نتائج البحث بالوصف:';
+    }
+  }
+  lastNote = note;
+  return res;
+}
+function doSearch(q){
+  const t0 = performance.now();
+  lastResults = search(q); shown = 0;
+  $('results').innerHTML = '';
+  const info = $('sInfo');
+  if (!q.trim()){ info.textContent = ''; return; }
+  if (!lastResults.length){ info.innerHTML = `ما لقيت شي لـ «${esc(q)}». جرّب جزء من الرقم أو كلمة ثانية من الوصف.`; return; }
+  info.innerHTML = `${lastNote ? esc(lastNote) + ' ' : ''}${N(lastResults.length)} نتيجة${lastResults.length >= 3000 ? ' (أول ٣٠٠٠)' : ''} · <bdi dir="ltr">${Math.round(performance.now() - t0)}ms</bdi>`;
+  more();
+}
+function more(){
+  const frag = document.createElement('div');
+  const end = Math.min(lastResults.length, shown + 40);
+  for (let j = shown; j < end; j++) frag.insertAdjacentHTML('beforeend', card(row(lastResults[j]), lastResults.length === 1));
+  shown = end;
+  const old = $('moreBtn'); if (old) old.remove();
+  $('results').append(...frag.childNodes);
+  if (shown < lastResults.length) $('results').insertAdjacentHTML('beforeend', `<button class="btn sec more" id="moreBtn">عرض المزيد (${N(lastResults.length - shown)})</button>`);
+}
+function stockHtml(r){
+  const tot = r.q1 + r.q2;
+  let h = tot > 0 ? `<span class="st ok">✅ متوفر ${N(r.q1)}</span>` : `<span class="st no">❌ غير متوفر${r.q1 < 0 ? ' (' + N(r.q1) + ')' : ''}</span>`;
+  if (r.q2) h += `<span class="st">فرع ٢: ${N(r.q2)}</span>`;
+  if (r.loc) h += `<span class="st">📍 <bdi>${esc(r.loc)}</bdi></span>`;
+  return h;
+}
+function discInfo(r){
+  // خصم الشراء الحقيقي = 1 − التكلفة ÷ سعر الشركه ، والدايركت = خصم الشراء − DGAP
+  const has = r.comp > 0 && r.disc > 0 && r.cost > 0;
+  const buy = has ? Math.round((1 - r.cost / r.comp) * 10000) / 100 : 0;
+  if (POVR.has(r.pn)){ // سعر كتبته بيدك (بدون ضريبة)
+    const price = POVR.get(r.pn);
+    return { has, buy, price, d: has ? Math.round((1 - price / r.comp) * 10000) / 100 : 0, manual: true };
+  }
+  if (!has) return { has, d: 0, buy, price: r.sell };
+  const d = DOVR.has(r.pn) ? DOVR.get(r.pn) : Math.max(0, Math.round((buy - DGAP) * 100) / 100);
+  return { has, d, buy, price: Math.round(r.comp * (100 - d)) / 100 };
+}
+function card(r, open){
+  const inB = BASKET.some(b => b.pn === r.pn);
+  const tags = isLexus(r.pn) ? '<span class="tag lx">لكزس</span>' : '';
+  const di = discInfo(r);
+  let prices = `<div class="pr main" data-pbox="${r.i}"><div class="l">سعر البيع شامل الضريبة</div>
+    <div class="v" data-fin>${di.price ? money(withVat(di.price)) : '—'}</div>
+    <div class="pin"><span>سعر البيع بدون ضريبة</span><input data-pin="${r.i}" type="number" inputmode="decimal" step="0.01" min="0" value="${di.price ? fmt2(di.price) : ''}"><button class="reset${di.manual || DOVR.has(r.pn) ? '' : ' hidden'}" data-act="reset" data-i="${r.i}">↺ الأصلي</button></div>
+    ${di.has ? `<div class="disc"><span>خصم دايركت</span><button data-act="dm" data-i="${r.i}">−</button><input data-din="${r.i}" type="number" inputmode="decimal" step="1" min="0" max="100" value="${di.d}"><b>%</b><button data-act="dp" data-i="${r.i}">+</button></div>
+    <div class="s">من سعر الشركه ${money(r.comp)} بدون ضريبة${SHOW_COST ? ` · خصم الشراء (من التكلفة) ${N(di.buy, 2)}%` : ''}</div>` : ''}
+    <div class="warn${r.min && di.price && di.price < r.min ? '' : ' hidden'}" data-warn>⚠️ السعر أقل من أدنى سعر</div>
+  </div>
+  <div class="pr"><div class="l">أدنى سعر شامل الضريبة</div><div class="v">${r.min ? money(withVat(r.min)) : '—'}</div><div class="s">${r.min ? 'بدون ضريبة: ' + money(r.min) : 'غير محدد بالنظام'}</div></div>`;
+  if (SHOW_COST){
+    const net = r.comp * (1 - r.disc / 100);
+    if (r.comp) prices += `<div class="pr cost"><div class="l">س.الشركه</div><div class="v">${money(r.comp)}</div><div class="s">${r.disc ? `خصم الشركه ${N(r.disc, 2)}% · الصافي ${money(net)}` : 'بدون خصم شركه'}</div></div>`;
+    prices += `<div class="pr cost"><div class="l">التكلفة (بدون ضريبة)</div><div class="v">${r.cost ? money(r.cost) : '—'}</div><div class="s" data-profit>${profitTxt(r, di.price)}</div></div>`;
+  }
+  const altBtn = r.alts.length ? `<button class="btn sec" data-act="alts" data-i="${r.i}">البدائل (${N(r.alts.length)})</button>` : '';
+  return `<div class="card" data-i="${r.i}">
+    <div class="ctop"><span class="pn">${esc(r.pn)}</span>${tags}<button class="copy" data-act="copy" data-pn="${esc(r.pn)}">نسخ الرقم</button></div>
+    <div class="desc">${r.ar ? `<div>${esc(r.ar)}</div>` : ''}${r.en ? `<div class="en">${esc(r.en)}</div>` : ''}${!r.ar && !r.en ? '<div class="hint" style="margin:0">بدون وصف</div>' : ''}</div>
+    <div class="stats">${stockHtml(r)}</div>
+    <div class="prices">${prices}</div>
+    <div class="cact"><button class="btn ${inB ? 'added' : ''}" data-act="add" data-i="${r.i}">${addLabel(r, inB)}</button>${altBtn}</div>
+    <div class="alts hidden" data-alts="${r.i}"></div>
+  </div>`;
+}
+function profitTxt(r, price){ return r.cost && price ? 'الربح ' + N((price - r.cost) / price * 100, 2) + '%' : ''; }
+function setDisc(i, d){
+  const r = row(i); d = Math.max(0, Math.min(100, Math.round(d * 100) / 100 || 0));
+  DOVR.set(r.pn, d); POVR.delete(r.pn); refreshPrice(i);
+}
+function setPrice(i, v){
+  const r = row(i); v = Math.round((+v || 0) * 100) / 100; if (v < 0) v = 0;
+  POVR.set(r.pn, v); DOVR.delete(r.pn); refreshPrice(i);
+}
+function resetPrice(i){ const r = row(i); POVR.delete(r.pn); DOVR.delete(r.pn); refreshPrice(i, true); }
+function refreshPrice(i, force){
+  const r = row(i); const di = discInfo(r);
+  const b = BASKET.find(x => x.pn === r.pn); if (b && b.avail){ b.net = di.price || 0; b.price = di.price ? withVat(di.price) : 0; saveBasket(); }
+  const box = document.querySelector(`[data-pbox="${i}"]`); if (!box) return;
+  box.querySelector('[data-fin]').innerHTML = di.price ? money(withVat(di.price)) : '—';
+  const pin = box.querySelector('[data-pin]'); if (force || document.activeElement !== pin) pin.value = di.price ? fmt2(di.price) : '';
+  const din = box.querySelector('[data-din]'); if (din && (force || document.activeElement !== din)) din.value = di.d;
+  box.querySelector('.reset').classList.toggle('hidden', !(di.manual || DOVR.has(r.pn)));
+  box.querySelector('[data-warn]').classList.toggle('hidden', !(r.min && di.price && di.price < r.min));
+  const pf = box.closest('.card').querySelector('[data-profit]'); if (pf) pf.innerHTML = profitTxt(r, di.price);
+}
+function altsHtml(r){
+  return r.alts.map(a => {
+    const j = exactIdx(a);
+    if (j < 0) return `<div class="altrow" data-act="go" data-pn="${esc(a)}"><span class="pn">${esc(a)}</span><span class="q hint" style="margin:0">مو موجودة بالنظام</span></div>`;
+    const x = row(j); const tot = x.q1 + x.q2;
+    return `<div class="altrow" data-act="go" data-pn="${esc(x.pn)}"><span class="pn">${esc(x.pn)}</span>${isLexus(x.pn) ? '<span class="tag lx">لكزس</span>' : ''}<span class="q"><span class="st ${tot > 0 ? 'ok' : 'no'}" style="padding:2px 7px">${tot > 0 ? N(x.q1) : '٠'}</span> ${x.sell ? money(withVat(x.sell)) : '—'}</span></div>`;
+  }).join('');
+}
+
+/* ---------- الرد على الزبون ---------- */
+function basketName(r){ const ar = r.ar.replace(/^[A-Z0-9 .\/-]{4,}-/i, '').trim(); return ar || r.en; }
+function toggleBasket(i){
+  const r = row(i); const k = BASKET.findIndex(b => b.pn === r.pn);
+  if (k >= 0) BASKET.splice(k, 1);
+  else {
+    const di = discInfo(r); const avail = r.q1 + r.q2 > 0;
+    const it = { pn: r.pn, name: basketName(r), avail, net: di.price || 0, price: di.price ? withVat(di.price) : 0, qty: 1, stock: r.q1 + r.q2, elec: isElectrical(r) };
+    if (!avail){ it.order = ''; it.base = r.comp || r.sell; it.baseIsComp = r.comp > 0; it.odisc = ORDER_DISC; it.price = orderPrice(it); }
+    BASKET.push(it);
+  }
+  saveBasket(); renderBasketBar();
+}
+function saveBasket(){ try { sessionStorage.setItem('basket', JSON.stringify(BASKET)); } catch(e){} }
+function renderBasketBar(){ $('rCount').textContent = BASKET.length; $('rbar').classList.toggle('hidden', !BASKET.length || $('vSearch').classList.contains('hidden')); }
+let SHOW_PN = false; // رقم القطعة ما يظهر للزبون إلا إذا اخترت
+const ORDER_DISC = 20; // خصم الطلبية الافتراضي ٪ من سعر الشركه دايم (بدون ضريبة)، وإذا القطعة ما لها سعر شركه فمن سعر البيع
+const ORDER_TYPES = {
+  urgent: { label: 'طلب مستعجل', time: 'يوصل خلال يومين تقريباً' },
+  japan:  { label: 'طلب مستعجل من اليابان', time: 'مدته 15 يوم على الأقل، وممكن يوصل لشهر أو شهرين وأكثر' },
+  normal: { label: 'طلب عادي', time: 'يوصل خلال أسبوع تقريباً' },
+  none:   { label: 'بدون طلبية (غير متوفرة بس)', time: '' }
+};
+const fmt2 = v => (Math.round(v * 100) / 100).toFixed(2);
+function addLabel(r, inB){ const avail = r.q1 + r.q2 > 0; return inB ? (avail ? '✓ مضافة للرد' : '✓ مضافة كطلبية') : (avail ? '+ أضف للرد' : '📦 طلبية'); }
+function orderNet(b){ return b.base ? Math.round(b.base * (100 - b.odisc)) / 100 : 0; }
+function orderPrice(b){ b.net = orderNet(b); return b.net ? withVat(b.net) : 0; }
+const ELEC_RE = /حساس|حساسات|كمبيوتر|بوبين|رليه|ريليه|رلية|ريلية|دينمو|دينامو|سلف|كويل|فيوز|سويتش|مفتاح|اسلاك|أسلاك|ضفيرة|بلف كهرب|كهرب|SENSOR|RELAY|COIL|ALTERNATOR|STARTER|SWITCH|COMPUTER|ECU|MODULE|HARNESS|WIRE|FUSE|IGNITER|ACTUATOR|AMPLIFIER|SOLENOID/i;
+function isElectrical(r){ return ELEC_RE.test((r.ar || '') + ' ' + (r.en || '')); }
+function policyText(){
+  const o = BASKET.some(b => isOrder(b)), e = BASKET.some(b => b.elec && (b.avail || isOrder(b)));
+  if (!o && !e) return '';
+  const what = o && e ? 'القطع الكهربائية والطلبيات الخاصة' : o ? 'الطلبيات الخاصة' : 'القطع الكهربائية';
+  return `سياسة الاستبدال والاسترجاع: ${what} لا يُقبل إرجاعها أو استبدالها بعد الشراء، ما عدا حالات العيب المصنعي.`;
+}
+function isOrder(b){ return !b.avail && b.order !== 'none'; } // '' = طلبية ما انختار نوعها للحين
+function replyText(){
+  const L = ['السلام عليكم ورحمة الله وبركاته', ''];
+  let total = 0, priced = 0, orders = 0, japan = false;
+  for (const b of BASKET){
+    let name = (b.name || '').trim();
+    if (!SHOW_PN && !b.nameEdited) name = name.replace(/\S*\d{4,}-[A-Z0-9]{3,}\S*/gi, ' ').replace(/\s{2,}/g, ' ').trim();
+    if (!SHOW_PN && !name) name = 'قطعة غيار';
+    if (SHOW_PN) L.push(`🔹 رقم القطعة: \u200E${customerNo(b.pn)}`);
+    if (name) L.push(SHOW_PN ? name : `🔹 ${name}`);
+    const priceLine = (head) => {
+      const pre = head ? head + ' — ' : '💵 ';
+      if (!b.price) return `${pre}الكمية ${b.qty}`;
+      const line = Math.round(b.price * b.qty * 100) / 100; total += line; priced++;
+      return b.qty > 1 ? `${pre}الكمية ${b.qty} × ${fmt2(b.price)} = ${fmt2(line)} ريال شامل الضريبة` : `${pre}السعر ${fmt2(b.price)} ريال شامل الضريبة`;
+    };
+    if (b.avail) L.push(priceLine('✅ متوفرة'));
+    else if (isOrder(b)){
+      const t = ORDER_TYPES[b.order] || null; orders++; if (b.order === 'japan') japan = true;
+      L.push(t ? `📦 غير متوفرة حالياً، ونقدر نطلبها لك (${t.label})` : '📦 غير متوفرة حالياً، ونقدر نطلبها لك');
+      if (t) L.push(`⏱️ ${t.time}`);
+      L.push(priceLine(''));
+    }
+    else L.push('❌ غير متوفرة حالياً');
+    if (b.elec && (b.avail || isOrder(b))) L.push('⚡ قطعة كهربائية');
+    L.push('');
+  }
+  if (priced > 1 || (priced === 1 && BASKET.length > 1)) { L.push(`💰 المجموع: ${fmt2(total)} ريال شامل الضريبة`); L.push(''); }
+  const pol = policyText();
+  if (japan) L.push('⚠️ الطلب من اليابان ممكن يجينا فيه إشعار إن تصنيع القطعة متوقف.');
+  if (pol) L.push('⚠️ ' + pol);
+  if (japan || pol) L.push('');
+  L.push('مؤسسة يحيى محمد الموسى لقطع غيار تويوتا ولكزس');
+  return L.join('\n');
+}
+function openSheet(){
+  $('rItems').innerHTML = BASKET.map((b, k) => {
+    const over = b.avail && b.stock != null && b.qty > b.stock;
+    const qtyBox = (b.avail || isOrder(b)) ? `<div class="qty"><button data-qm="${k}">−</button><b class="n">${b.qty}</b><button data-qp="${k}">+</button></div>
+      <div class="lt">${b.price ? fmt2(b.price * b.qty) : '—'}</div>` : '';
+    const orderBox = !b.avail ? `<div class="obox">
+        <select data-otype="${k}" class="${b.order ? '' : 'need'}"><option value=""${b.order ? '' : ' selected'} disabled>اختر نوع الطلب…</option>${Object.entries(ORDER_TYPES).map(([v, t]) => `<option value="${v}"${b.order === v ? ' selected' : ''}>📦 ${t.label}</option>`).join('')}</select>
+        ${isOrder(b) ? `<div class="disc"><span>خصم الطلبية</span><button data-om="${k}">−</button><input data-odisc="${k}" type="number" inputmode="decimal" value="${b.odisc}"><b>%</b><button data-op="${k}">+</button></div>
+        <div class="hint" style="margin:0">${!b.base ? 'ما لها سعر في النظام' : b.baseIsComp === false ? `ما لها سعر شركه — من سعر البيع ${money(b.base)} بدون ضريبة` : `من سعر الشركه ${money(b.base)} بدون ضريبة`}</div>` : ''}
+      </div>` : '';
+    return `<div class="bi">
+      <div class="bi-row"><div class="bi-h"><span>${b.avail ? '✅' : (isOrder(b) ? '📦' : '❌')}</span><span class="pn" style="font-size:14px">${esc(b.pn)}</span></div><button class="x" data-rm="${k}">حذف</button></div>
+      <input class="nm${(b.name || '').trim() ? '' : ' empty'}" data-nm="${k}" type="text" dir="auto" value="${esc(b.name || '')}" placeholder="اكتب اسم القطعة">
+      ${over ? `<div class="warn">⚠️ المتوفر ${b.stock} بس</div>` : ''}
+      ${(b.avail || isOrder(b)) ? `<div class="bi-row bi-q">${`<label class="elec"><input type="checkbox" data-elec="${k}"${b.elec ? ' checked' : ''}> ⚡ كهربائية</label>`}<span style="flex:1"></span>${qtyBox}</div>` : ''}
+      ${orderBox}</div>`;
+  }).join('');
+  $('rShowPn').checked = SHOW_PN;
+  $('rText').value = replyText();
+  $('rSheet').classList.remove('hidden');
+}
+function setOrderDisc(k, d){ const b = BASKET[k]; b.odisc = Math.max(0, Math.min(100, Math.round((+d || 0) * 100) / 100)); b.price = orderPrice(b); saveBasket(); }
+function waPhone(p){ p = (p || '').replace(/\D/g, ''); if (/^05\d{8}$/.test(p)) return '966' + p.slice(1); if (/^5\d{8}$/.test(p)) return '966' + p; if (/^9665\d{8}$/.test(p)) return p; if (/^009665\d{8}$/.test(p)) return p.slice(2); return ''; }
+
+/* ---------- Firebase ---------- */
+async function loadFirebase(){
+  if (FB) return FB;
+  const base = `https://www.gstatic.com/firebasejs/${FB_VER}/`;
+  const [app, a, f] = await Promise.all([import(base + 'firebase-app.js'), import(base + 'firebase-auth.js'), import(base + 'firebase-firestore.js')]);
+  const inst = app.initializeApp(CFG);
+  auth = a.getAuth(inst); db = f.getFirestore(inst);
+  FB = { a, f }; return FB;
+}
+const timeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
+async function isAdmin(email){
+  const { f } = FB;
+  const s = await timeout(f.getDoc(f.doc(db, 'roles', email.toLowerCase())), 12000);
+  return s.exists() && s.data().role === 'admin';
+}
+
+/* ---------- تحميل الكتالوج ---------- */
+async function openCatalog(force){
+  const cached = await idbGet('catalog').catch(() => null);
+  if (DEMO){
+    if (cached && !force){ loadText(cached.text, cached.meta); }
+    else { const d = demoData(); loadText(d.text, d.meta); }
+    banner('وضع التجربة: بيانات وهمية. لما تحط إعدادات Firebase في config.js يشتغل على بياناتك الحقيقية. تقدر تجرب «تحديث البيانات» بملفاتك وتنحفظ على هالجهاز بس.');
+    return goSearch();
+  }
+  let meta = null;
+  try {
+    const { f } = FB;
+    loading('أتأكد من آخر تحديث…', 0.02);
+    const s = await timeout(f.getDoc(f.doc(db, 'catalog', 'meta')), 12000);
+    meta = s.exists() ? s.data() : null;
+  } catch(e){
+    if (cached){ loadText(cached.text, cached.meta); banner('ما فيه إنترنت — أعرض البيانات المحفوظة على الجهاز.'); return goSearch(); }
+    throw e;
+  }
+  if (!meta){
+    loadText('', {}); banner('ما فيه بيانات مرفوعة للحين. افتح القائمة ☰ ← «تحديث البيانات من النظام» من كمبيوتر المحل.');
+    return goSearch();
+  }
+  if (cached && cached.meta && cached.meta.version === meta.version && !force){
+    loadText(cached.text, cached.meta); banner(''); return goSearch();
+  }
+  const { f } = FB; let done = 0;
+  loading('أحمّل بيانات القطع…', 0.05, 'أول مرة بعد كل تحديث بس، بعدها تنفتح فوراً');
+  const parts = await Promise.all(Array.from({ length: meta.chunks }, async (_, i) => {
+    const s = await f.getDoc(f.doc(db, 'catalog_chunks', `${meta.version}_${i}`));
+    if (!s.exists()) throw new Error('جزء ناقص من البيانات، ارفعها من جديد');
+    const t = await gunzip(s.data().d.toUint8Array());
+    done++; loading('أحمّل بيانات القطع…', 0.05 + 0.9 * done / meta.chunks, `${done} من ${meta.chunks}`);
+    return t;
+  }));
+  const text = parts.join('\n');
+  const m = { version: meta.version, count: meta.count, inStock: meta.inStock, dataDate: meta.dataDate };
+  await idbSet('catalog', { text, meta: m }).catch(() => {});
+  loadText(text, m); banner('');
+  goSearch();
+}
+function goSearch(){
+  show('vSearch'); renderBasketBar();
+  $('menuBtn').classList.remove('hidden');
+  $('mUpdate').classList.toggle('hidden', !(DEMO || (USER && USER.admin)));
+  setTimeout(() => $('q').focus(), 50);
+}
+
+/* ---------- تحديث البيانات ---------- */
+let UPFILES = null, BUILT = null;
+function pickFiles(list){
+  UPFILES = {}; const names = [];
+  for (const f of list){
+    const n = f.name.toUpperCase(); names.push(f.name);
+    if (n.includes('IMISZZZZ')) UPFILES.imis = f; else if (n.includes('IMIDZZZZ')) UPFILES.imid = f; else if (n.startsWith('ALTER')) UPFILES.alter = f;
+  }
+  const need = [['imis','IMISZZZZ.DBF'],['imid','IMIDZZZZ.DBF'],['alter','ALTER.DBF']];
+  $('uList').innerHTML = need.map(([k, n]) => `<li class="${UPFILES[k] ? 'ok' : 'no'}">${UPFILES[k] ? '✓' : '✗'} <bdi dir="ltr">${n}</bdi>${UPFILES[k] ? ' — ' + N(UPFILES[k].size / 1048576, 1) + ' MB' : ' — ناقص'}</li>`).join('');
+  $('uRead').disabled = !need.every(([k]) => UPFILES[k]);
+  $('uSum').innerHTML = ''; $('uUpload').classList.add('hidden'); BUILT = null;
+}
+function uProg(msg, f){ $('uBarW').classList.remove('hidden'); $('uBar').style.width = Math.round(f * 100) + '%'; $('uMsg').textContent = msg; }
+async function readFiles(){
+  $('uRead').disabled = true; $('uUpload').classList.add('hidden'); $('uSum').innerHTML = '';
+  try {
+    const stages = { 'الأصناف': [0, .45], 'الكميات': [.45, .9], 'البدائل': [.9, .97], 'ترتيب': [.97, 1] };
+    BUILT = await buildCatalog(UPFILES, (st, f) => { const [a, b] = stages[st]; uProg(`أقرأ ${st}…`, a + (b - a) * f); });
+    const s = BUILT.stats, old = CAT && CAT.meta;
+    uProg('خلصت القراءة ✓', 1);
+    $('uSum').innerHTML = `<table class="sum">
+      <tr><td>تاريخ بيانات النظام</td><td><bdi dir="ltr">${esc(s.dataDate)}</bdi></td></tr>
+      <tr><td>عدد القطع</td><td>${N(s.count)}${old && old.count ? ` <span class="hint">(قبل: ${N(old.count)})</span>` : ''}</td></tr>
+      <tr><td>المتوفر (رصيد أكبر من صفر)</td><td>${N(s.inStock)}${old && old.inStock ? ` <span class="hint">(قبل: ${N(old.inStock)})</span>` : ''}</td></tr>
+    </table>`;
+    $('uUpload').textContent = DEMO ? 'احفظ على هالجهاز (وضع التجربة)' : 'ارفع للموقع';
+    $('uUpload').classList.remove('hidden');
+  } catch(e){ $('uMsg').innerHTML = `<span class="no">صار خطأ: ${esc(e.message)}</span>`; }
+  $('uRead').disabled = false;
+}
+async function upload(){
+  if (!BUILT) return;
+  const btn = $('uUpload'); btn.disabled = true; $('uRead').disabled = true;
+  try {
+    const s = BUILT.stats; const version = String(Date.now());
+    const meta = { version, count: s.count, inStock: s.inStock, dataDate: s.dataDate };
+    const text = BUILT.lines.join('\n');
+    if (DEMO){
+      await idbSet('catalog', { text, meta });
+    } else {
+      uProg('أضغط البيانات…', 0);
+      const chunks = await makeChunks(BUILT.lines, f => uProg('أضغط البيانات…', 0.3 * f));
+      const { f } = FB;
+      for (let i = 0; i < chunks.length; i++){
+        await f.setDoc(f.doc(db, 'catalog_chunks', `${version}_${i}`), { v: version, i, d: f.Bytes.fromUint8Array(chunks[i]) });
+        uProg(`أرفع… ${i + 1} من ${chunks.length}`, 0.3 + 0.6 * (i + 1) / chunks.length);
+      }
+      await f.setDoc(f.doc(db, 'catalog', 'meta'), { ...meta, chunks: chunks.length, bytes: chunks.reduce((a, c) => a + c.length, 0), uploadedAt: f.serverTimestamp(), uploadedBy: USER.email });
+      uProg('أنظف النسخة القديمة…', 0.93);
+      const old = await f.getDocs(f.query(f.collection(db, 'catalog_chunks'), f.where('v', '!=', version)));
+      await Promise.all(old.docs.map(d => f.deleteDoc(d.ref)));
+      await idbSet('catalog', { text, meta }).catch(() => {});
+    }
+    loadText(text, meta);
+    uProg('تم التحديث ✓', 1);
+    toast('تم تحديث البيانات ✓'); banner(DEMO ? 'وضع التجربة: البيانات محفوظة على هالجهاز بس.' : '');
+    btn.classList.add('hidden'); BUILT = null;
+  } catch(e){ $('uMsg').innerHTML = `<span class="no">ما تم الرفع: ${esc(e.message)}</span>`; }
+  btn.disabled = false; $('uRead').disabled = false;
+}
+
+/* ---------- بيانات التجربة ---------- */
+function demoData(){
+  const names = [['فحمات امامي كامري','PAD KIT, DISC BRAKE, FR'],['فلتر زيت','FILTER, OIL'],['فلتر هواء','ELEMENT, AIR CLEANER'],['بواجي','PLUG, SPARK'],['مساعد امامي يمين','ABSORBER, SHOCK, FR RH'],['قربة ماء','RESERVOIR, RADIATOR'],['سير مكينة','BELT, V-RIBBED'],['طرمبة ماء','PUMP ASSY, ENGINE WATER'],['شمعة امامي يسار','LAMP ASSY, HEADLAMP, LH'],['كفر قير','COVER, TRANSMISSION']];
+  const pre = ['04465','90915','17801','90919','48510','16470','90916','16100','81150','33101'];
+  const lines = []; let r = 7;
+  const rnd = n => { r = (r * 9301 + 49297) % 233280; return Math.floor(r / 233280 * n); };
+  for (let i = 0; i < 2500; i++){
+    const t = i % 10; const lx = i % 9 === 0 ? 'X' : '';
+    const pn = `${lx}${pre[t]}-${String(10000 + i * 7).slice(-5)}`;
+    const sell = 20 + rnd(900); const q = rnd(4) ? rnd(40) : 0;
+    lines.push([pn, names[t][1], names[t][0] + (lx ? ' لكزس' : ' تويوتا'), sell, Math.round(sell * .88), Math.round(sell * .6), q, i % 50 === 0 ? 3 : '', q ? 'A' + rnd(30) : '', Math.round(sell * .5), sell, 32, 0, i % 7 === 0 ? 1 : 0, i % 5 === 0 ? 4 : 0, i > 0 && i % 4 === 0 ? `${pre[t]}-${String(10000 + (i - 1) * 7).slice(-5)} ${pre[t]}-99999` : ''].join('\t'));
+  }
+  lines.sort((a, b) => { const x = normKey(a.split('\t')[0]), y = normKey(b.split('\t')[0]); return x < y ? -1 : x > y ? 1 : 0; });
+  return { text: lines.join('\n'), meta: { version: 'demo', count: lines.length, inStock: lines.filter(l => +l.split('\t')[6] > 0).length, dataDate: 'تجربة' } };
+}
+
+/* ---------- عرض سعر PDF ---------- */
+const CO = { name: 'مؤسسة يحيى محمد يحى الموسى للتجارة', cr: '7010880586', vat: '300804522500003' };
+const QUOTE_DAYS = 3;
+function loadImg(src){ return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('ما قدرت أحمّل ' + src)); i.src = src; }); }
+function ymd(d){ return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+function quoteLines(){
+  // القطع اللي تدخل العرض: المتوفر + الطلبيات (اللي "بدون طلبية" ما تدخل)
+  return BASKET.filter(b => b.avail || isOrder(b)).map(b => {
+    const net = b.net || 0, unit = b.price || 0;
+    let name = (b.name || '').trim();
+    if (!SHOW_PN && !b.nameEdited) name = name.replace(/\S*\d{4,}-[A-Z0-9]{3,}\S*/gi, ' ').replace(/\s{2,}/g, ' ').trim();
+    if (!SHOW_PN && !name) name = 'قطعة غيار';
+    const notes = [];
+    if (isOrder(b)){ const t = ORDER_TYPES[b.order]; notes.push(t ? `طلبية (${t.label}) — ${t.time}` : 'طلبية'); }
+    if (b.elec) notes.push('قطعة كهربائية');
+    return { pn: customerNo(b.pn), name, qty: b.qty, net, unit, lineNet: Math.round(net * b.qty * 100) / 100, lineInc: Math.round(unit * b.qty * 100) / 100, notes };
+  });
+}
+async function buildQuotePdf(customer){
+  const lines = quoteLines();
+  if (!lines.length) throw new Error('ما فيه قطع متوفرة أو طلبيات في القائمة');
+  const [hdr, ftr] = await Promise.all([loadImg('quote-header.jpg'), loadImg('quote-footer.jpg')]);
+  const W = 1654, H = 2339, M = 110, CW = W - 2 * M, R = W - M, L = M;
+  const FONT = 'Arial, "Helvetica Neue", "Geeza Pro", "SF Arabic", Tahoma, sans-serif';
+  // ألوان هوية الموسى
+  const C426 = '#25282a', C424 = '#707372', C422 = '#9ea2a2', C420 = '#c7c9c7', ZEBRA = '#f4f4f3', CHAMP = '#ece8de', GOLD = '#a69f88', RED = '#da291c', MUTED = '#5f6263';
+  const hdrH = Math.round(hdr.height * W / hdr.width), ftrH = Math.round(ftr.height * W / ftr.width);
+  const top = hdrH + 6, bottom = H - ftrH - 24;
+  const today = new Date(), until = new Date(today.getTime() + QUOTE_DAYS * 864e5);
+  const sub = lines.reduce((a, l) => a + l.lineNet, 0), inc = lines.reduce((a, l) => a + l.lineInc, 0);
+  const vat = Math.round((inc - sub) * 100) / 100;
+  const pages = []; let x, y;
+  const newPage = () => {
+    const c = document.createElement('canvas'); c.width = W; c.height = H; pages.push(c);
+    x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+    x.drawImage(hdr, 0, 0, W, hdrH); x.drawImage(ftr, 0, H - ftrH, W, ftrH); y = top;
+  };
+  const txt = (s, X, Y, size, o = {}) => { x.font = `${o.bold ? 'bold ' : ''}${size}px ${FONT}`; x.fillStyle = o.color || C426; x.textAlign = o.align || 'right'; x.direction = o.dir || 'rtl'; x.fillText(s, X, Y); };
+  const wrap = (s, maxW, size, bold) => {
+    x.font = `${bold ? 'bold ' : ''}${size}px ${FONT}`; const out = []; let cur = '';
+    for (const w of String(s).split(/\s+/)){ const t = cur ? cur + ' ' + w : w; if (x.measureText(t).width > maxW && cur){ out.push(cur); cur = w; } else cur = t; }
+    if (cur) out.push(cur); return out;
+  };
+  const box = (X, Y, w, h, fill, stroke, lw = 2) => { if (fill){ x.fillStyle = fill; x.fillRect(X, Y, w, h); } if (stroke){ x.strokeStyle = stroke; x.lineWidth = lw; x.strokeRect(X, Y, w, h); } };
+  newPage();
+  // شريط العنوان
+  box(L, y, CW, 104, C426);
+  txt('عرض سعر', R - 36, y + 70, 56, { bold: true, color: '#fff' });
+  x.save(); x.font = `30px ${FONT}`; x.fillStyle = '#fff'; x.textAlign = 'left'; x.direction = 'ltr';
+  let lx = L + 36; for (const ch of 'QUOTATION'){ x.fillText(ch, lx, y + 64); lx += x.measureText(ch).width + 9; } x.restore();
+  box(L, y + 104, CW, 7, RED);
+  y += 111 + 36;
+  // بيانات المؤسسة / بيانات العرض
+  const gap = 36, bw = (CW - gap) / 2, bh = 230;
+  const infoBox = (X, title, rows) => {
+    box(X, y, bw, bh, null, C422, 2); box(X, y, bw, 58, CHAMP); x.strokeStyle = C422; x.lineWidth = 2; x.strokeRect(X, y, bw, 58);
+    txt(title, X + bw - 24, y + 40, 27, { bold: true });
+    let ry = y + 58 + 50; for (const [k, v, bold] of rows){ txt(k, X + bw - 24, ry, 27, { color: MUTED }); x.font = `27px ${FONT}`; const kw = x.measureText(k).width; txt(v, X + bw - 24 - kw - 12, ry, bold ? 29 : 27, { bold, dir: /^[\d\-\s]+$/.test(v) ? 'ltr' : 'rtl', align: /^[\d\-\s]+$/.test(v) ? 'right' : 'right' }); ry += 52; }
+  };
+  infoBox(R - bw, 'بيانات المؤسسة', [['الاسم:', CO.name], ['السجل التجاري:', CO.cr], ['الرقم الضريبي:', CO.vat]]);
+  infoBox(L, 'بيانات العرض', [['العميل:', customer || '—'], ['التاريخ:', ymd(today)], ['صالح حتى:', ymd(until)]]);
+  y += bh + 40;
+  // الجدول
+  const cols = [{ w: 84, t: 'م' }, { w: 0, t: 'الوصف' }, { w: 150, t: 'الكمية' }, { w: 255, t: 'سعر الوحدة *' }, { w: 265, t: 'الإجمالي *' }];
+  cols[1].w = CW - cols.reduce((a, c) => a + c.w, 0);
+  let cx = R; for (const c of cols){ c.r = cx; c.l = cx - c.w; c.m = (c.r + c.l) / 2; cx -= c.w; }
+  const headH = 72;
+  const drawHead = () => {
+    box(L, y, CW, headH, C426);
+    x.strokeStyle = C424; x.lineWidth = 2; x.beginPath(); for (const c of cols.slice(1)){ x.moveTo(c.r, y); x.lineTo(c.r, y + headH); } x.stroke();
+    for (const c of cols) txt(c.t, c.m, y + 47, 28, { bold: true, align: 'center', color: '#fff' });
+    y += headH;
+  };
+  drawHead(); let tableTop = y - headH;
+  const closeTable = () => { x.strokeStyle = C422; x.lineWidth = 3; x.strokeRect(L, tableTop, CW, y - tableTop); };
+  lines.forEach((l, i) => {
+    const dl = [];
+    if (SHOW_PN) dl.push({ s: l.pn, size: 29, dir: 'ltr' });
+    for (const s2 of wrap(l.name, cols[1].w - 44, 29, false)) dl.push({ s: s2, size: 29 });
+    const rowH = Math.max(88, 30 + dl.length * 44 + 14);
+    if (y + rowH > bottom - 30){ closeTable(); newPage(); y += 10; drawHead(); tableTop = y - headH; }
+    box(L, y, CW, rowH, i % 2 ? ZEBRA : '#fff');
+    let dy = y + (rowH - dl.length * 44) / 2 + 30;
+    for (const d of dl){ txt(d.s, cols[1].r - 22, dy, d.size, { bold: d.bold, dir: d.dir || 'rtl' }); dy += 44; }
+    const mid = y + rowH / 2 + 10;
+    txt(String(i + 1), cols[0].m, mid, 29, { align: 'center' });
+    txt(String(l.qty), cols[2].m, mid, 29, { align: 'center' });
+    txt(l.net ? fmt2(l.net) : '—', cols[3].m, mid, 29, { align: 'center', dir: 'ltr' });
+    txt(l.lineNet ? fmt2(l.lineNet) : '—', cols[4].m, mid, 29, { align: 'center', dir: 'ltr', bold: true });
+    x.strokeStyle = C420; x.lineWidth = 2; x.beginPath();
+    x.moveTo(L, y + rowH); x.lineTo(R, y + rowH);
+    for (const c of cols.slice(1)){ x.moveTo(c.r, y); x.lineTo(c.r, y + rowH); }
+    x.stroke();
+    y += rowH;
+  });
+  closeTable();
+  // الشروط
+  const pol = policyText(), japan = BASKET.some(b => isOrder(b) && b.order === 'japan');
+  const notes = ['الأسعار المعلّمة بـ (*) بدون ضريبة.', `صلاحية العرض ${QUOTE_DAYS} أيام من تاريخه.`, 'هذا عرض سعر وليس فاتورة ضريبية.'];
+  if (japan) notes.push('الطلب من اليابان مدته 15 يوم على الأقل وقد يمتد لشهر أو أكثر، وقد يرد إشعار بتوقف تصنيع القطعة.');
+  if (pol) notes.push(pol);
+  const tw = 640, nw = CW - tw - gap;
+  const nLines = notes.flatMap(n => wrap(n, nw - 70, 25, false).map((s2, j) => ({ s: s2, first: j === 0, red: n === pol })));
+  const notesH = 58 + 24 + nLines.length * 40 + 16, totalsH = 3 * 72;
+  if (y + 40 + Math.max(notesH, totalsH) > bottom){ newPage(); y += 10; }
+  y += 40;
+  // المجاميع (يسار)
+  const trow = (t, v, i, strong) => {
+    const Y = y + i * 72;
+    box(L, Y, tw, 72, strong ? C426 : (i % 2 ? ZEBRA : '#fff'), strong ? null : C422, 2);
+    txt(t, L + tw - 24, Y + 47, 28, { bold: true, color: strong ? '#fff' : C426 });
+    txt(`${fmt2(v)} ريال`, L + 24, Y + 48, 29, { bold: true, align: 'left', dir: 'ltr', color: strong ? '#fff' : C426 });
+  };
+  trow('المجموع قبل الضريبة', sub, 0, false); trow('ضريبة القيمة المضافة 15%', vat, 1, false); trow('الإجمالي شامل الضريبة', inc, 2, true);
+  box(L, y + 3 * 72, tw, 6, RED);
+  // الشروط والملاحظات (يمين)
+  const nx = R - nw;
+  box(nx, y, nw, notesH, null, C422, 2); box(nx, y, nw, 58, CHAMP); x.strokeStyle = C422; x.strokeRect(nx, y, nw, 58);
+  txt('الشروط والملاحظات', R - 24, y + 40, 27, { bold: true });
+  let ny = y + 58 + 24 + 26;
+  for (const n of nLines){ if (n.first){ x.fillStyle = n.red ? RED : GOLD; x.beginPath(); x.arc(R - 30, ny - 9, 6, 0, Math.PI * 2); x.fill(); } txt(n.s, R - 50, ny, 25, { color: n.red ? '#b3261e' : C426 }); ny += 40; }
+  // ترقيم الصفحات
+  if (pages.length > 1) pages.forEach((pc, i) => { const px = pc.getContext('2d'); px.direction = 'rtl'; px.font = `22px ${FONT}`; px.fillStyle = MUTED; px.textAlign = 'center'; px.fillText(`صفحة ${i + 1} من ${pages.length}`, W / 2, H - ftrH - 4); });
+  const jpgs = await Promise.all(pages.map(pc => new Promise(r => pc.toBlob(b => b.arrayBuffer().then(ab => r(new Uint8Array(ab))), 'image/jpeg', 0.9))));
+  return { pdf: makePdf(jpgs, W, H), pages, total: inc };
+}
+function makePdf(jpgs, w, h){
+  // ملف PDF بسيط: كل صفحة A4 فيها صورة JPEG
+  const enc = new TextEncoder(); const parts = []; const offs = []; let len = 0;
+  const push = d => { const b = typeof d === 'string' ? enc.encode(d) : d; parts.push(b); len += b.length; };
+  const obj = (n, body) => { offs[n] = len; push(`${n} 0 obj\n`); body(); push('\nendobj\n'); };
+  const PW = 595.28, PH = 841.89, n = jpgs.length;
+  push('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n');
+  const kids = jpgs.map((_, i) => `${3 + i * 3} 0 R`).join(' ');
+  obj(1, () => push('<< /Type /Catalog /Pages 2 0 R >>'));
+  obj(2, () => push(`<< /Type /Pages /Kids [${kids}] /Count ${n} >>`));
+  jpgs.forEach((j, i) => {
+    const p = 3 + i * 3, ct = p + 1, im = p + 2;
+    const cs = `q ${PW} 0 0 ${PH} 0 0 cm /Im0 Do Q`;
+    obj(p, () => push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /XObject << /Im0 ${im} 0 R >> >> /Contents ${ct} 0 R >>`));
+    obj(ct, () => push(`<< /Length ${cs.length} >>\nstream\n${cs}\nendstream`));
+    obj(im, () => { push(`<< /Type /XObject /Subtype /Image /Width ${w} /Height ${h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${j.length} >>\nstream\n`); push(j); push('\nendstream'); });
+  });
+  const total = 3 + n * 3; const xref = len;
+  push(`xref\n0 ${total}\n0000000000 65535 f \n`);
+  for (let i = 1; i < total; i++) push(String(offs[i]).padStart(10, '0') + ' 00000 n \n');
+  push(`trailer\n<< /Size ${total} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`);
+  const out = new Uint8Array(len); let o = 0; for (const p of parts){ out.set(p, o); o += p.length; }
+  return out;
+}
+async function shareQuote(){
+  if (BASKET.some(b => !b.avail && !b.order)){ toast('اختر نوع الطلب لكل طلبية أول'); return; }
+  const btn = $('rPdf'); btn.disabled = true; const old = btn.textContent; btn.textContent = 'أجهّز الملف…';
+  try {
+    const cust = $('rCust').value.trim();
+    const { pdf } = await buildQuotePdf(cust);
+    const fname = `عرض سعر - الموسى${cust ? ' - ' + cust : ''} - ${ymd(new Date())}.pdf`;
+    const file = new File([pdf], fname, { type: 'application/pdf' });
+    window.__lastQuote = pdf;
+    if (navigator.canShare && navigator.canShare({ files: [file] })){
+      try { await navigator.share({ files: [file], title: 'عرض سعر' }); } catch(e){ if (e.name !== 'AbortError') throw e; }
+    } else {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = fname; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 30000);
+    }
+  } catch(e){ toast('ما قدرت أسوي العرض: ' + e.message); }
+  btn.disabled = false; btn.textContent = old;
+}
+
+/* ---------- الأحداث ---------- */
+$('sForm').addEventListener('submit', e => { e.preventDefault(); doSearch($('q').value); $('q').blur(); });
+$('results').addEventListener('click', async e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const act = b.dataset.act;
+  if (act === 'copy'){ if (await copyText(b.dataset.pn)) toast('تم نسخ الرقم'); }
+  else if (act === 'add'){ const r = row(+b.dataset.i); toggleBasket(+b.dataset.i); const inB = BASKET.some(x => x.pn === r.pn); b.classList.toggle('added', inB); b.textContent = addLabel(r, inB); }
+  else if (act === 'alts'){ const box = document.querySelector(`[data-alts="${b.dataset.i}"]`); if (box.classList.contains('hidden') && !box.innerHTML) box.innerHTML = altsHtml(row(+b.dataset.i)); box.classList.toggle('hidden'); }
+  else if (act === 'dm' || act === 'dp'){ const i = +b.dataset.i; const cur = +document.querySelector(`[data-din="${i}"]`).value || 0; setDisc(i, act === 'dp' ? Math.floor(cur) + 1 : Math.ceil(cur) - 1); }
+  else if (act === 'reset'){ resetPrice(+b.dataset.i); }
+  else if (act === 'go'){ $('q').value = b.dataset.pn; doSearch(b.dataset.pn); window.scrollTo({ top: 0 }); }
+  else if (b.id === 'moreBtn'){ more(); }
+});
+$('results').addEventListener('click', e => { if (e.target.id === 'moreBtn') more(); });
+$('results').addEventListener('input', e => {
+  const i = e.target.dataset.din; if (i != null && e.target.value !== '') return setDisc(+i, +e.target.value);
+  const j = e.target.dataset.pin; if (j != null && e.target.value !== '') return setPrice(+j, +e.target.value);
+});
+$('results').addEventListener('change', e => { const j = e.target.dataset.pin; if (j != null) refreshPrice(+j, true); const i = e.target.dataset.din; if (i != null) refreshPrice(+i, true); });
+
+$('menuBtn').onclick = e => { e.stopPropagation(); $('menu').classList.toggle('hidden'); };
+document.addEventListener('click', () => $('menu').classList.add('hidden'));
+$('mSearch').onclick = () => goSearch();
+$('mUpdate').onclick = () => { show('vUpdate'); };
+$('mReload').onclick = async () => { await idbClear(); try { await openCatalog(true); } catch(e){ banner('ما قدرت أحمّل: ' + esc(e.message)); goSearch(); } };
+$('mLogout').onclick = async () => { await idbClear(); BASKET = []; saveBasket(); if (!DEMO && auth) await FB.a.signOut(auth); location.reload(); };
+$('uFiles').onchange = e => pickFiles(e.target.files);
+$('uRead').onclick = readFiles;
+$('uUpload').onclick = upload;
+$('uBack').onclick = goSearch;
+$('rOpen').onclick = openSheet;
+$('rClose').onclick = () => $('rSheet').classList.add('hidden');
+$('rPdf').onclick = shareQuote;
+$('rShowPn').onchange = e => { SHOW_PN = e.target.checked; $('rText').value = replyText(); };
+$('rItems').addEventListener('input', e => {
+  const n = e.target.dataset.nm; if (n == null) return;
+  const b = BASKET[+n]; b.name = e.target.value; b.nameEdited = true; saveBasket();
+  e.target.classList.toggle('empty', !b.name.trim()); $('rText').value = replyText();
+});
+$('rItems').addEventListener('change', e => {
+  const el = e.target.dataset.elec; if (el != null){ BASKET[+el].elec = e.target.checked; saveBasket(); $('rText').value = replyText(); return; }
+  const t = e.target.dataset.otype; if (t != null){ BASKET[+t].order = e.target.value; saveBasket(); openSheet(); return; }
+  const o = e.target.dataset.odisc; if (o != null){ setOrderDisc(+o, e.target.value); openSheet(); }
+});
+$('rSheet').onclick = e => { if (e.target.id === 'rSheet') $('rSheet').classList.add('hidden'); };
+$('rItems').onclick = e => {
+  const qm = e.target.dataset.qm, qp = e.target.dataset.qp;
+  const om = e.target.dataset.om, op = e.target.dataset.op;
+  if (om != null || op != null){ const k = +(om ?? op); setOrderDisc(k, Math.round(BASKET[k].odisc) + (op != null ? 1 : -1)); openSheet(); return; }
+  if (qm != null || qp != null){ const b = BASKET[+(qm ?? qp)]; b.qty = Math.max(1, (b.qty || 1) + (qp != null ? 1 : -1)); saveBasket(); openSheet(); return; }
+  const k = e.target.dataset.rm; if (k == null) return; BASKET.splice(+k, 1); saveBasket(); renderBasketBar(); if (!BASKET.length){ $('rSheet').classList.add('hidden'); } else openSheet(); if ($('q').value.trim()) doSearch($('q').value); };
+const needType = () => { if (BASKET.some(b => !b.avail && !b.order)){ toast('اختر نوع الطلب لكل طلبية أول'); return true; } return false; };
+$('rCopy').onclick = async () => { if (needType()) return; if (await copyText($('rText').value)) toast('تم النسخ — الصقه في محادثة الزبون'); };
+$('rWa').onclick = () => { if (needType()) return; const p = waPhone($('rPhone').value); if ($('rPhone').value.trim() && !p){ toast('رقم الجوال غير صحيح'); return; } window.open(`https://wa.me/${p}?text=${encodeURIComponent($('rText').value)}`, '_blank'); };
+$('rClear').onclick = () => { BASKET = []; saveBasket(); renderBasketBar(); $('rSheet').classList.add('hidden'); if ($('q').value.trim()) doSearch($('q').value); };
+$('loginForm').addEventListener('submit', async e => {
+  e.preventDefault(); $('lErr').textContent = ''; $('lBtn').disabled = true;
+  try { await FB.a.signInWithEmailAndPassword(auth, $('lEmail').value.trim(), $('lPass').value); }
+  catch(err){ $('lErr').textContent = /invalid|wrong|user-not-found|credential/.test(err.code || '') ? 'الإيميل أو كلمة المرور غلط' : /too-many/.test(err.code || '') ? 'محاولات كثيرة، انتظر شوي وجرب' : /network/.test(err.code || '') ? 'ما فيه إنترنت' : 'ما قدرت أدخل: ' + (err.code || err.message); }
+  $('lBtn').disabled = false;
+});
+$('lReset').onclick = async () => {
+  const em = $('lEmail').value.trim(); if (!em){ $('lErr').textContent = 'اكتب الإيميل أول'; return; }
+  try { await FB.a.sendPasswordResetEmail(auth, em); $('lErr').textContent = 'أرسلت رابط تغيير كلمة المرور على إيميلك'; } catch(e){ $('lErr').textContent = 'ما قدرت أرسل: ' + (e.code || e.message); }
+};
+
+/* ---------- البداية ---------- */
+try { BASKET = JSON.parse(sessionStorage.getItem('basket') || '[]'); BASKET.forEach(b => { if (!b.qty) b.qty = 1; if (b.net == null && b.price) b.net = Math.round(b.price / 1.15 * 100) / 100; }); } catch(e){ BASKET = []; }
+async function start(){
+  if (DEMO){ USER = { email: 'demo', admin: true }; return openCatalog(false).catch(e => banner(esc(e.message))); }
+  loading('جاري التحميل…', 0.01);
+  try { await loadFirebase(); }
+  catch(e){
+    const cached = await idbGet('catalog').catch(() => null);
+    if (cached){ loadText(cached.text, cached.meta); banner('ما فيه إنترنت — أعرض البيانات المحفوظة على الجهاز.'); return goSearch(); }
+    loading('ما قدرت أتصل. تأكد من الإنترنت وافتح الصفحة من جديد.', 0); return;
+  }
+  FB.a.onAuthStateChanged(auth, async u => {
+    if (!u){ USER = null; $('menuBtn').classList.add('hidden'); banner(''); show('vLogin'); return; }
+    USER = { email: u.email, admin: false };
+    try {
+      loading('أتأكد من الصلاحية…', 0.01);
+      USER.admin = await isAdmin(u.email);
+      if (!USER.admin){ banner('حسابك ما له صلاحية على هالموقع.'); ['menuBtn'].forEach(id => $(id).classList.remove('hidden')); ['mUpdate','mReload','mSearch'].forEach(id => $(id).classList.add('hidden')); show('vLogin'); return; }
+      await openCatalog(false);
+    } catch(e){
+      const cached = await idbGet('catalog').catch(() => null);
+      if (cached){ loadText(cached.text, cached.meta); banner('ما فيه إنترنت — أعرض البيانات المحفوظة على الجهاز.'); USER.admin = true; return goSearch(); }
+      banner('صار خطأ: ' + esc(e.message)); show('vLogin');
+    }
+  });
+}
+window.__app = { search: q => search(q).map(row), doSearch, replyText, buildQuotePdf, get CAT(){ return CAT; }, get BASKET(){ return BASKET; } };
+start();
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+})();
+/*APP-END*/
+</script>
+</body>
+</html>
