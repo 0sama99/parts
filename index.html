@@ -442,8 +442,10 @@ function search(qRaw){
     if (toks.length){
       const D = descIndex();
       for (let i = 0; i < D.length; i++){ const d = D[i]; let ok = true; for (const t of toks) if (!d.includes(t)){ ok = false; break; } if (ok){ res.push(i); if (res.length >= 3000) break; } }
-      const st = i => { const r = CAT.lines[i].split('\t'); return (+r[6] > 0 || +(r[7] || 0) > 0) ? 0 : 1; };
-      res.sort((a, b) => st(a) - st(b) || a - b);
+      // المتوفر أول، وبعدها ترتيب أبجدي حسب الوصف (العربي، وإذا ما فيه فالإنجليزي)
+      const info = new Map(res.map(i => { const r = CAT.lines[i].split('\t'); const d = normAr((r[2] || r[1] || '').trim()); return [i, { st: (+r[6] > 0 || +(r[7] || 0) > 0) ? 0 : 1, d }]; }));
+      const coll = new Intl.Collator('ar');
+      res.sort((a, b) => { const A = info.get(a), B = info.get(b); return A.st - B.st || (!A.d - !B.d) || coll.compare(A.d, B.d) || a - b; });
       if (res.length) note = 'نتائج البحث بالوصف:';
     }
   }
