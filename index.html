@@ -59,6 +59,8 @@ header{position:sticky;top:0;z-index:20;background:var(--brand);color:var(--bran
 .tag{font-size:12px;border-radius:999px;padding:2px 8px;background:var(--chip);color:var(--ink)}
 .tag.lx{background:#1d1d1f;color:#fff}
 .copy{margin-inline-start:auto;border:1px solid var(--line);background:var(--card);border-radius:9px;padding:4px 9px;font-size:13px;color:var(--ink)}
+.cps{margin-inline-start:auto;display:flex;gap:6px}
+.cps .copy{margin-inline-start:0}
 .desc{margin-top:4px;font-size:15px}
 .desc .en{direction:ltr;text-align:right;color:var(--muted);font-size:13.5px}
 .stats{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
@@ -451,6 +453,8 @@ function descIndex(){
 }
 const isLexus = pn => /^X\d/i.test(pn);
 const customerNo = pn => isLexus(pn) ? pn.slice(1) : pn;
+// للبحث في موقع الشركه: بدون شرطات ولا مسافات، واللكزس بدون X
+const companyNo = pn => customerNo(pn).replace(/[-\s]/g, '');
 
 /* ---------- البحث ---------- */
 function search(qRaw){
@@ -553,7 +557,7 @@ function card(r, open){
   }
   const altBtn = r.alts.length ? `<button class="btn sec" data-act="alts" data-i="${r.i}">البدائل (${N(r.alts.length)})</button>` : '';
   return `<div class="card" data-i="${r.i}">
-    <div class="ctop"><span class="pn">${esc(r.pn)}</span>${tags}<button class="copy" data-act="copy" data-pn="${esc(r.pn)}">نسخ الرقم</button></div>
+    <div class="ctop"><span class="pn">${esc(r.pn)}</span>${tags}<span class="cps"><button class="copy" data-act="copy" data-pn="${esc(r.pn)}">نسخ الرقم</button><button class="copy" data-act="copyco" data-pn="${esc(r.pn)}">نسخ للشركه</button></span></div>
     <div class="desc">${r.ar ? `<div>${esc(r.ar)}</div>` : ''}${r.en ? `<div class="en">${esc(r.en)}</div>` : ''}${!r.ar && !r.en ? '<div class="hint" style="margin:0">بدون وصف</div>' : ''}</div>
     <div class="stats">${stockHtml(r)}</div>
     <div class="prices">${prices}</div>
@@ -1130,6 +1134,7 @@ $('results').addEventListener('click', async e => {
   const b = e.target.closest('[data-act]'); if (!b) return;
   const act = b.dataset.act;
   if (act === 'copy'){ if (await copyText(b.dataset.pn)) toast('تم نسخ الرقم'); }
+  else if (act === 'copyco'){ const t = companyNo(b.dataset.pn); if (await copyText(t)) toast('تم النسخ للشركه: ' + t); }
   else if (act === 'add'){ const r = row(+b.dataset.i); toggleBasket(+b.dataset.i); const inB = BASKET.some(x => x.pn === r.pn); b.classList.toggle('added', inB); b.textContent = addLabel(r, inB); }
   else if (act === 'alts'){ const box = document.querySelector(`[data-alts="${b.dataset.i}"]`); if (box.classList.contains('hidden') && !box.innerHTML) box.innerHTML = altsHtml(row(+b.dataset.i)); box.classList.toggle('hidden'); }
   else if (act === 'dm' || act === 'dp'){ const i = +b.dataset.i; const cur = +document.querySelector(`[data-din="${i}"]`).value || 0; setDisc(i, act === 'dp' ? Math.floor(cur) + 1 : Math.ceil(cur) - 1); }
@@ -1234,7 +1239,7 @@ async function start(){
     }
   });
 }
-window.__app = { search: q => search(q).map(row), doSearch, replyText, buildQuotePdf, staffLine, get STAFF(){ return STAFF; }, get CAT(){ return CAT; }, get BASKET(){ return BASKET; } };
+window.__app = { search: q => search(q).map(row), doSearch, replyText, buildQuotePdf, staffLine, companyNo, get STAFF(){ return STAFF; }, get CAT(){ return CAT; }, get BASKET(){ return BASKET; } };
 start();
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
