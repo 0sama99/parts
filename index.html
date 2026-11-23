@@ -152,6 +152,7 @@ table.sum{width:100%;border-collapse:collapse;margin:10px 0;font-size:15px}
 table.sum td{border-bottom:1px solid var(--line);padding:7px 4px}
 table.sum td:last-child{text-align:left;font-weight:700}
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--toast);color:var(--bg);padding:9px 16px;border-radius:999px;z-index:60;font-size:14.5px}
+body.staff .aonly{display:none!important}
 footer{color:var(--muted);font-size:12.5px;text-align:center;margin-top:24px}
 </style>
 </head>
@@ -235,20 +236,20 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;margin-top:24px}
 
 <!-- شريط الرد -->
 <div class="rbar hidden" id="rbar">
-  <button class="btn" id="rOpen">💬 الرد على الزبون (<bdi class="n" id="rCount">0</bdi>)</button>
+  <button class="btn" id="rOpen"><span id="rOpenL">💬 الرد على الزبون</span> (<bdi class="n" id="rCount">0</bdi>)</button>
 </div>
 <div class="sheet hidden" id="rSheet">
   <div class="in">
-    <div style="display:flex;align-items:center;margin-bottom:6px"><b style="flex:1">الرد على الزبون</b><button class="btn sec" id="rClose" style="padding:6px 12px">إغلاق</button></div>
+    <div style="display:flex;align-items:center;margin-bottom:6px"><b style="flex:1" id="rTitle">الرد على الزبون</b><button class="btn sec" id="rClose" style="padding:6px 12px">إغلاق</button></div>
     <div id="rItems"></div>
     <div id="rTot"></div>
     <div id="rShipBox"></div>
     <label class="chk"><input type="checkbox" id="rShowPn"> إظهار رقم القطعة للزبون</label>
-    <div class="hint" style="margin-top:8px">تقدر تعدّل النص قبل الإرسال:</div>
+    <div class="aonly"><div class="hint" style="margin-top:8px">تقدر تعدّل النص قبل الإرسال:</div>
     <textarea id="rText"></textarea>
-    <input class="ph" id="rPhone" type="tel" inputmode="tel" placeholder="رقم الزبون (اختياري)">
+    <input class="ph" id="rPhone" type="tel" inputmode="tel" placeholder="رقم الزبون (اختياري)"></div>
     <input class="ph" id="rCust" type="text" placeholder="اسم العميل لعرض السعر (اختياري)" style="direction:rtl;text-align:right">
-    <div class="row">
+    <div class="row aonly">
       <button class="btn" id="rCopy">📋 نسخ</button>
       <button class="btn" id="rWa">💬 واتساب</button>
     </div>
@@ -354,6 +355,15 @@ const N = (v, d = 0) => '<bdi class="n" dir="ltr">' + Number(v).toLocaleString('
 const money = v => N(Math.round(v * 100) / 100, 2);
 const withVat = v => Math.round(Math.round(v * 100) * 115 / 100) / 100; // بالهللات عشان التقريب يكون صح
 let FB = null, auth = null, db = null, USER = null;
+// الموظف (role = "staff"): يبحث بالرقم ويعدّل السعر ويسوي عرض سعر بس. بياناته نسخة منفصلة فيها الرقم والوصف وسعر البيع والحد بس
+let STAFF = false;
+function setStaff(on){
+  STAFF = !!on; document.body.classList.toggle('staff', STAFF);
+  $('q').placeholder = STAFF ? 'رقم القطعة' : 'رقم القطعة أو الوصف';
+  if (STAFF) $('sInfo').textContent = 'اكتب رقم القطعة بأي شكل (بشرطة أو بدونها). قطع لكزس تنبحث تلقائياً بحرف X.';
+  $('rOpenL').textContent = STAFF ? '📄 عرض السعر' : '💬 الرد على الزبون';
+  $('rTitle').textContent = STAFF ? 'عرض السعر' : 'الرد على الزبون';
+}
 let CAT = null; // {lines, keys, meta}
 let DESC = null;
 let BASKET = [];
@@ -376,7 +386,7 @@ function loading(msg, frac, sub){ show('vLoading'); $('ldMsg').textContent = msg
 function setHeaderInfo(){
   if (!CAT){ $('hsub').textContent = ''; return; }
   const m = CAT.meta || {};
-  $('hsub').innerHTML = `بيانات النظام: <bdi dir="ltr">${esc(m.dataDate || '—')}</bdi> · ${N(m.count || CAT.lines.length)} قطعة · ${N(m.inStock || 0)} متوفرة`;
+  $('hsub').innerHTML = `بيانات النظام: <bdi dir="ltr">${esc(m.dataDate || '—')}</bdi> · ${N(m.count || CAT.lines.length)} قطعة` + (STAFF ? '' : ` · ${N(m.inStock || 0)} متوفرة`);
 }
 async function copyText(t){
   try { await navigator.clipboard.writeText(t); return true; } catch(e){}
@@ -403,6 +413,16 @@ async function makeChunks(lines, onP){
   return out;
 }
 
+/* نسخة الموظف: نفس ترتيب الأعمدة عشان row() يشتغل، بس فيها الرقم والوصف وسعر البيع (= سعر الشركه، وإذا ما فيه فسعر البيع) والحد
+   الحد = أدنى سعر، وإذا ما فيه فالتكلفة (بدون ضريبة). ما فيها كمية ولا موقع ولا تكلفة ولا سعر شركه ولا بدائل. */
+function staffLine(l){
+  const p = l.split('\t');
+  const sell = +p[3] || 0, cost = +p[5] || 0, comp = +p[10] || 0, min = +p[12] || 0;
+  const price = comp > 0 ? comp : sell; // قرار أسامة 17:06: يطلع له سعر الشركه (باسم «سعر البيع»)، وإذا ما فيه سعر شركه فسعر البيع
+  return [p[0], p[1] || '', p[2] || '', fmt(price), '', '', '1', '', '', '', '', '', fmt(min || cost), '', '', ''].join('\t');
+}
+function staffLines(lines){ return lines.map(staffLine); }
+const CATCOL = () => STAFF ? ['staff', 'staff_chunks'] : ['catalog', 'catalog_chunks'];
 /* ---------- الكتالوج في الذاكرة ---------- */
 function loadText(text, meta){
   const lines = text ? text.split('\n') : [];
@@ -458,6 +478,7 @@ function search(qRaw){
       if (res.length) note = 'الرقم اللي كتبته مو موجود كقطعة، بس هو بديل للقطع هذي:';
     }
   }
+  if (STAFF){ lastNote = res.length ? '' : 'ابحث برقم القطعة.'; return res; }
   if (!res.length){
     const toks = normAr(q).split(/\s+/).filter(Boolean);
     if (toks.length){
@@ -479,7 +500,8 @@ function doSearch(q){
   $('results').innerHTML = '';
   const info = $('sInfo');
   if (!q.trim()){ info.textContent = ''; return; }
-  if (!lastResults.length){ info.innerHTML = `ما لقيت شي لـ «${esc(q)}». جرّب جزء من الرقم أو كلمة ثانية من الوصف.`; return; }
+  if (STAFF && !/\d/.test(q)){ info.textContent = 'اكتب رقم القطعة.'; return; }
+  if (!lastResults.length){ info.innerHTML = STAFF ? `ما لقيت قطعة بالرقم «${esc(q)}». تأكد من الرقم أو جرّب جزء منه.` : `ما لقيت شي لـ «${esc(q)}». جرّب جزء من الرقم أو كلمة ثانية من الوصف.`; return; }
   info.innerHTML = `${lastNote ? esc(lastNote) + ' ' : ''}${N(lastResults.length)} نتيجة${lastResults.length >= 3000 ? ' (أول ٣٠٠٠)' : ''} · <bdi dir="ltr">${Math.round(performance.now() - t0)}ms</bdi>`;
   more();
 }
@@ -512,6 +534,7 @@ function discInfo(r){
   return { has, d, buy, price: Math.round(r.comp * (100 - d)) / 100 };
 }
 function card(r, open){
+  if (STAFF) return staffCard(r);
   const inB = BASKET.some(b => b.pn === r.pn);
   const tags = isLexus(r.pn) ? '<span class="tag lx">لكزس</span>' : '';
   const di = discInfo(r);
@@ -538,6 +561,24 @@ function card(r, open){
     <div class="alts hidden" data-alts="${r.i}"></div>
   </div>`;
 }
+function staffCard(r){
+  const inB = BASKET.some(b => b.pn === r.pn);
+  const tags = isLexus(r.pn) ? '<span class="tag lx">لكزس</span>' : '';
+  const di = discInfo(r);
+  return `<div class="card" data-i="${r.i}">
+    <div class="ctop"><span class="pn">${esc(r.pn)}</span>${tags}<button class="copy" data-act="copy" data-pn="${esc(r.pn)}">نسخ الرقم</button></div>
+    <div class="desc">${r.ar ? `<div>${esc(r.ar)}</div>` : ''}${r.en ? `<div class="en">${esc(r.en)}</div>` : ''}${!r.ar && !r.en ? '<div class="hint" style="margin:0">بدون وصف</div>' : ''}</div>
+    <div class="prices"><div class="pr main" data-pbox="${r.i}"><div class="l">سعر البيع شامل الضريبة</div>
+      <div class="vin"><input data-vin="${r.i}" type="number" inputmode="decimal" step="0.01" min="0" value="${di.price ? fmt2(incOf(r, di.price)) : ''}"><span>ريال</span><span class="h">✏️ اكتب السعر شامل الضريبة</span></div>
+      <div class="pin"><span>سعر البيع بدون ضريبة</span><input data-pin="${r.i}" type="number" inputmode="decimal" step="0.01" min="0" value="${di.price ? fmt2(di.price) : ''}"><button class="reset${di.manual ? '' : ' hidden'}" data-act="reset" data-i="${r.i}">↺ الأصلي</button></div>
+      <div class="warn hidden" data-warn></div>
+    </div></div>
+    <div class="cact"><div class="qty cqty"><span>الكمية</span><button data-act="cqm" data-i="${r.i}">−</button><b class="n" data-cqn="${r.i}">${cardQty(r)}</b><button data-act="cqp" data-i="${r.i}">+</button></div><button class="btn ${inB ? 'added' : ''}" data-act="add" data-i="${r.i}">${addLabel(r, inB)}</button></div>
+  </div>`;
+}
+// الموظف: السعر ما ينزل تحت الحد (أدنى سعر أو التكلفة). الحد ما ينكتب له — يرجع السعر للأصلي
+const BELOW_MSG = 'هذا السعر أقل من المسموح، رجّعته للسعر الأصلي';
+function belowFloor(r, net){ return STAFF && r && r.min > 0 && net > 0 && net < r.min - 0.004; }
 function cardQty(r){ const b = BASKET.find(x => x.pn === r.pn); return b ? b.qty : (CQTY.get(r.pn) || 1); }
 // لو كتبت السعر شامل الضريبة، نستخدم رقمك بالضبط (بعض الأرقام مثل 33 ما لها سعر بدون ضريبة بهللات يعطيها بالضبط)
 function incOf(r, net){ const t = VINC.get(r.pn); return t != null && POVR.get(r.pn) === net ? t : withVat(net); }
@@ -553,7 +594,7 @@ function netFromInc(v){
   for (const n of [n0, n0 - 0.01, n0 + 0.01]){ const k = Math.round(n * 100) / 100; if (withVat(k) === v) return k; }
   return n0;
 }
-function profitTxt(r, price){ return r.cost && price ? 'الربح ' + N((price - r.cost) / price * 100, 2) + '%' : ''; }
+function profitTxt(r, price){ if (STAFF) return ''; return r.cost && price ? 'الربح ' + N((price - r.cost) / price * 100, 2) + '%' : ''; }
 function setDisc(i, d){
   const r = row(i); d = Math.max(0, Math.min(100, Math.round(d * 100) / 100 || 0));
   DOVR.set(r.pn, d); POVR.delete(r.pn); VINC.delete(r.pn); refreshPrice(i);
@@ -575,7 +616,7 @@ function refreshPrice(i, force){
   const pin = box.querySelector('[data-pin]'); if (force || document.activeElement !== pin) pin.value = di.price ? fmt2(di.price) : '';
   const din = box.querySelector('[data-din]'); if (din && (force || document.activeElement !== din)) din.value = di.d;
   box.querySelector('.reset').classList.toggle('hidden', !(di.manual || DOVR.has(r.pn)));
-  box.querySelector('[data-warn]').classList.toggle('hidden', !(r.min && di.price && di.price < r.min));
+  box.querySelector('[data-warn]').classList.toggle('hidden', STAFF || !(r.min && di.price && di.price < r.min));
   const pf = box.closest('.card').querySelector('[data-profit]'); if (pf) pf.innerHTML = profitTxt(r, di.price);
 }
 function altsHtml(r){
@@ -593,8 +634,8 @@ function toggleBasket(i){
   const r = row(i); const k = BASKET.findIndex(b => b.pn === r.pn);
   if (k >= 0) BASKET.splice(k, 1);
   else {
-    const di = discInfo(r); const avail = r.q1 + r.q2 > 0;
-    const it = { pn: r.pn, name: basketName(r), avail, net: di.price || 0, price: di.price ? incOf(r, di.price) : 0, qty: CQTY.get(r.pn) || 1, stock: r.q1 + r.q2, elec: isElectrical(r) };
+    const di = discInfo(r); const avail = STAFF || r.q1 + r.q2 > 0;
+    const it = { pn: r.pn, name: basketName(r), avail, net: di.price || 0, price: di.price ? incOf(r, di.price) : 0, qty: CQTY.get(r.pn) || 1, stock: STAFF ? null : r.q1 + r.q2, elec: isElectrical(r) };
     if (!avail){ it.order = ''; it.base = r.comp || r.sell; it.baseIsComp = r.comp > 0; it.odisc = ORDER_DISC; it.price = orderPrice(it); }
     BASKET.push(it);
   }
@@ -634,7 +675,7 @@ const ORDER_TYPES = {
   none:   { label: 'بدون طلبية (غير متوفرة بس)', time: '' }
 };
 const fmt2 = v => (Math.round(v * 100) / 100).toFixed(2);
-function addLabel(r, inB){ const avail = r.q1 + r.q2 > 0; return inB ? (avail ? '✓ مضافة للرد' : '✓ مضافة كطلبية') : (avail ? '+ أضف للرد' : '📦 طلبية'); }
+function addLabel(r, inB){ if (STAFF) return inB ? '✓ مضافة لعرض السعر' : '+ أضف لعرض السعر'; const avail = r.q1 + r.q2 > 0; return inB ? (avail ? '✓ مضافة للرد' : '✓ مضافة كطلبية') : (avail ? '+ أضف للرد' : '📦 طلبية'); }
 function orderNet(b){ return b.base ? Math.round(b.base * (100 - b.odisc)) / 100 : 0; }
 function orderPrice(b){ b.net = orderNet(b); return b.net ? withVat(b.net) : 0; }
 const ELEC_RE = /حساس|حساسات|كمبيوتر|بوبين|رليه|ريليه|رلية|ريلية|دينمو|دينامو|سلف|كويل|فيوز|سويتش|مفتاح|اسلاك|أسلاك|ضفيرة|بلف كهرب|كهرب|SENSOR|RELAY|COIL|ALTERNATOR|STARTER|SWITCH|COMPUTER|ECU|MODULE|HARNESS|WIRE|FUSE|IGNITER|ACTUATOR|AMPLIFIER|SOLENOID/i;
@@ -693,7 +734,7 @@ function renderItems(){
   $('rItems').innerHTML = BASKET.map((b, k) => {
     const over = b.avail && b.stock != null && b.qty > b.stock;
     const u = E.get(b).unit, changed = b.price && Math.abs(u - b.price) >= 0.005;
-    const rr = changed ? bRow(b) : null, belowMin = rr && rr.min && E.get(b).net < rr.min;
+    const rr = changed && !STAFF ? bRow(b) : null, belowMin = rr && rr.min && E.get(b).net < rr.min;
     const qtyBox = (b.avail || isOrder(b)) ? `<div class="qty"><button data-qm="${k}">−</button><b class="n">${b.qty}</b><button data-qp="${k}">+</button></div>
       <div class="lt">${changed ? `<div class="old">${fmt2(b.price * b.qty)}</div>` : ''}${u ? fmt2(u * b.qty) : '—'}</div>` : '';
     const orderBox = !b.avail ? `<div class="obox">
@@ -702,11 +743,11 @@ function renderItems(){
         <div class="hint" style="margin:0">${!b.base ? 'ما لها سعر في النظام' : b.baseIsComp === false ? `ما لها سعر شركه — من سعر البيع ${money(b.base)} بدون ضريبة` : `من سعر الشركه ${money(b.base)} بدون ضريبة`}</div>` : ''}
       </div>` : '';
     return `<div class="bi">
-      <div class="bi-row"><div class="bi-h"><span>${b.avail ? '✅' : (isOrder(b) ? '📦' : '❌')}</span><span class="pn" style="font-size:14px">${esc(b.pn)}</span></div><button class="x" data-rm="${k}">حذف</button></div>
+      <div class="bi-row"><div class="bi-h"><span>${STAFF ? '' : b.avail ? '✅' : (isOrder(b) ? '📦' : '❌')}</span><span class="pn" style="font-size:14px">${esc(b.pn)}</span></div><button class="x" data-rm="${k}">حذف</button></div>
       <input class="nm${(b.name || '').trim() ? '' : ' empty'}" data-nm="${k}" type="text" dir="auto" value="${esc(b.name || '')}" placeholder="اكتب اسم القطعة">
       ${over ? `<div class="warn">⚠️ المتوفر ${b.stock} بس</div>` : ''}
       ${belowMin ? `<div class="warn">⚠️ السعر بعد تعديل المجموع أقل من أدنى سعر (${fmt2(withVat(rr.min))} شامل الضريبة)</div>` : ''}
-      ${(b.avail || isOrder(b)) ? `<div class="bi-row bi-q">${`<label class="elec"><input type="checkbox" data-elec="${k}"${b.elec ? ' checked' : ''}> ⚡ كهربائية</label>`}<span style="flex:1"></span>${qtyBox}</div>` : ''}
+      ${(b.avail || isOrder(b)) ? `<div class="bi-row bi-q">${STAFF ? '' : `<label class="elec"><input type="checkbox" data-elec="${k}"${b.elec ? ' checked' : ''}> ⚡ كهربائية</label>`}<span style="flex:1"></span>${qtyBox}</div>` : ''}
       ${orderBox}</div>`;
   }).join('');
 }
@@ -715,7 +756,7 @@ function renderTot(withInput){
   if (!orig){ box.innerHTML = ''; return; }
   const E = effPrices(), on = TOT != null && TOT > 0 && Math.abs(TOT - orig) >= 0.005;
   const cur = r2(pricedItems().reduce((s, b) => s + r2(E.get(b).unit * b.qty), 0));
-  const av = BASKET.filter(b => b.avail && b.price);
+  const av = STAFF ? [] : BASKET.filter(b => b.avail && b.price);
   let cost = 0, net = 0, noCost = 0;
   for (const b of av){ const rr = bRow(b); if (!rr || !rr.cost){ noCost++; continue; } cost += rr.cost * b.qty; net += E.get(b).net * b.qty; }
   cost = r2(cost); net = r2(net);
@@ -763,33 +804,36 @@ async function loadFirebase(){
   FB = { a, f }; return FB;
 }
 const timeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
-async function isAdmin(email){
+async function getRole(email){
   const { f } = FB;
   const s = await timeout(f.getDoc(f.doc(db, 'roles', email.toLowerCase())), 12000);
-  return s.exists() && s.data().role === 'admin';
+  const r = s.exists() ? s.data().role : '';
+  return r === 'admin' || r === 'staff' ? r : '';
 }
 
 /* ---------- تحميل الكتالوج ---------- */
 async function openCatalog(force){
-  const cached = await idbGet('catalog').catch(() => null);
+  let cached = await idbGet('catalog').catch(() => null);
   if (DEMO){
-    if (cached && !force){ loadText(cached.text, cached.meta); }
-    else { const d = demoData(); loadText(d.text, d.meta); }
+    const d = cached && !force ? cached : demoData();
+    loadText(STAFF ? staffLines(d.text.split('\n')).join('\n') : d.text, d.meta);
     banner('وضع التجربة: بيانات وهمية. لما تحط إعدادات Firebase في config.js يشتغل على بياناتك الحقيقية. تقدر تجرب «تحديث البيانات» بملفاتك وتنحفظ على هالجهاز بس.');
     return goSearch();
   }
+  if (cached && (cached.role || 'admin') !== (STAFF ? 'staff' : 'admin')) cached = null;
+  const [CC, CK] = CATCOL();
   let meta = null;
   try {
     const { f } = FB;
     loading('أتأكد من آخر تحديث…', 0.02);
-    const s = await timeout(f.getDoc(f.doc(db, 'catalog', 'meta')), 12000);
+    const s = await timeout(f.getDoc(f.doc(db, CC, 'meta')), 12000);
     meta = s.exists() ? s.data() : null;
   } catch(e){
     if (cached){ loadText(cached.text, cached.meta); banner('ما فيه إنترنت — أعرض البيانات المحفوظة على الجهاز.'); return goSearch(); }
     throw e;
   }
   if (!meta){
-    loadText('', {}); banner('ما فيه بيانات مرفوعة للحين. افتح القائمة ☰ ← «تحديث البيانات من النظام» من كمبيوتر المحل.');
+    loadText('', {}); banner(STAFF ? 'ما فيه بيانات للحين. كلّم أسامة يرفع بيانات المحل.' : 'ما فيه بيانات مرفوعة للحين. افتح القائمة ☰ ← «تحديث البيانات من النظام» من كمبيوتر المحل.');
     return goSearch();
   }
   if (cached && cached.meta && cached.meta.version === meta.version && !force){
@@ -798,7 +842,7 @@ async function openCatalog(force){
   const { f } = FB; let done = 0;
   loading('أحمّل بيانات القطع…', 0.05, 'أول مرة بعد كل تحديث بس، بعدها تنفتح فوراً');
   const parts = await Promise.all(Array.from({ length: meta.chunks }, async (_, i) => {
-    const s = await f.getDoc(f.doc(db, 'catalog_chunks', `${meta.version}_${i}`));
+    const s = await f.getDoc(f.doc(db, CK, `${meta.version}_${i}`));
     if (!s.exists()) throw new Error('جزء ناقص من البيانات، ارفعها من جديد');
     const t = await gunzip(s.data().d.toUint8Array());
     done++; loading('أحمّل بيانات القطع…', 0.05 + 0.9 * done / meta.chunks, `${done} من ${meta.chunks}`);
@@ -806,14 +850,14 @@ async function openCatalog(force){
   }));
   const text = parts.join('\n');
   const m = { version: meta.version, count: meta.count, inStock: meta.inStock, dataDate: meta.dataDate };
-  await idbSet('catalog', { text, meta: m }).catch(() => {});
+  await idbSet('catalog', { text, meta: m, role: STAFF ? 'staff' : 'admin' }).catch(() => {});
   loadText(text, m); banner('');
   goSearch();
 }
 function goSearch(){
   show('vSearch'); renderBasketBar();
   $('menuBtn').classList.remove('hidden');
-  $('mUpdate').classList.toggle('hidden', !(DEMO || (USER && USER.admin)));
+  $('mUpdate').classList.toggle('hidden', STAFF || !(DEMO || (USER && USER.admin)));
   setTimeout(() => $('q').focus(), 50);
 }
 
@@ -863,13 +907,22 @@ async function upload(){
       const { f } = FB;
       for (let i = 0; i < chunks.length; i++){
         await f.setDoc(f.doc(db, 'catalog_chunks', `${version}_${i}`), { v: version, i, d: f.Bytes.fromUint8Array(chunks[i]) });
-        uProg(`أرفع… ${i + 1} من ${chunks.length}`, 0.3 + 0.6 * (i + 1) / chunks.length);
+        uProg(`أرفع… ${i + 1} من ${chunks.length}`, 0.3 + 0.3 * (i + 1) / chunks.length);
       }
       await f.setDoc(f.doc(db, 'catalog', 'meta'), { ...meta, chunks: chunks.length, bytes: chunks.reduce((a, c) => a + c.length, 0), uploadedAt: f.serverTimestamp(), uploadedBy: USER.email });
+      // نسخة الموظف (الرقم والوصف وسعر البيع والحد بس)
+      const sch = await makeChunks(staffLines(BUILT.lines), x => uProg('أجهز نسخة الموظف…', 0.6 + 0.1 * x));
+      for (let i = 0; i < sch.length; i++){
+        await f.setDoc(f.doc(db, 'staff_chunks', `${version}_${i}`), { v: version, i, d: f.Bytes.fromUint8Array(sch[i]) });
+        uProg(`أرفع نسخة الموظف… ${i + 1} من ${sch.length}`, 0.7 + 0.2 * (i + 1) / sch.length);
+      }
+      await f.setDoc(f.doc(db, 'staff', 'meta'), { version, count: s.count, dataDate: s.dataDate, chunks: sch.length, bytes: sch.reduce((a, c) => a + c.length, 0), uploadedAt: f.serverTimestamp(), uploadedBy: USER.email });
       uProg('أنظف النسخة القديمة…', 0.93);
-      const old = await f.getDocs(f.query(f.collection(db, 'catalog_chunks'), f.where('v', '!=', version)));
-      await Promise.all(old.docs.map(d => f.deleteDoc(d.ref)));
-      await idbSet('catalog', { text, meta }).catch(() => {});
+      for (const col of ['catalog_chunks', 'staff_chunks']){
+        const old = await f.getDocs(f.query(f.collection(db, col), f.where('v', '!=', version)));
+        await Promise.all(old.docs.map(d => f.deleteDoc(d.ref)));
+      }
+      await idbSet('catalog', { text, meta, role: 'admin' }).catch(() => {});
     }
     loadText(text, meta);
     uProg('تم التحديث ✓', 1);
@@ -1053,6 +1106,7 @@ function makePdf(jpgs, w, h){
 }
 async function shareQuote(){
   if (BASKET.some(b => !b.avail && !b.order)){ toast('اختر نوع الطلب لكل طلبية أول'); return; }
+  if (STAFF){ const E = effPrices(); if (pricedItems().some(b => belowFloor(bRow(b), E.get(b).net))){ toast('فيه سعر أقل من المسموح، عدّله أول'); return; } }
   const btn = $('rPdf'); btn.disabled = true; const old = btn.textContent; btn.textContent = 'أجهّز الملف…';
   try {
     const cust = $('rCust').value.trim();
@@ -1090,7 +1144,7 @@ $('results').addEventListener('input', e => {
   const j = e.target.dataset.pin; if (j != null && e.target.value !== '') return setPrice(+j, +e.target.value);
   const v = e.target.dataset.vin; if (v != null && e.target.value !== '') return setPriceInc(+v, e.target.value);
 });
-$('results').addEventListener('change', e => { const j = e.target.dataset.pin ?? e.target.dataset.vin; if (j != null) refreshPrice(+j, true); const i = e.target.dataset.din; if (i != null) refreshPrice(+i, true); });
+$('results').addEventListener('change', e => { const j = e.target.dataset.pin ?? e.target.dataset.vin; if (j != null){ const r = row(+j); if (belowFloor(r, discInfo(r).price)){ resetPrice(+j); toast(BELOW_MSG); } else refreshPrice(+j, true); } const i = e.target.dataset.din; if (i != null) refreshPrice(+i, true); });
 
 $('menuBtn').onclick = e => { e.stopPropagation(); $('menu').classList.toggle('hidden'); };
 document.addEventListener('click', () => $('menu').classList.add('hidden'));
@@ -1127,7 +1181,8 @@ $('rTot').addEventListener('input', e => {
   const v = r2(+e.target.value); TOT = v > 0 ? v : null; saveBasket();
   renderItems(); renderTot(false); $('rText').value = replyText();
 });
-$('rTot').addEventListener('change', e => { if (e.target.id === 'rTotIn'){ if (e.target.value === '') TOT = null; saveBasket(); renderTot(true); } });
+function totBelowFloor(){ if (!STAFF) return false; const E = effPrices(); return pricedItems().some(b => belowFloor(bRow(b), E.get(b).net)); }
+$('rTot').addEventListener('change', e => { if (e.target.id === 'rTotIn'){ if (e.target.value === '') TOT = null; if (totBelowFloor()){ TOT = null; toast('هذا المجموع أقل من المسموح، رجّعته للأصلي'); renderItems(); } saveBasket(); renderTot(true); } });
 $('rTot').addEventListener('click', e => { if (e.target.id === 'rTotReset'){ TOT = null; saveBasket(); renderItems(); renderTot(true); $('rText').value = replyText(); } });
 $('rSheet').onclick = e => { if (e.target.id === 'rSheet') $('rSheet').classList.add('hidden'); };
 $('rItems').onclick = e => {
@@ -1156,30 +1211,30 @@ try { const t = +sessionStorage.getItem('basketTot'); TOT = t > 0 ? t : null; } 
 try { const sh = +sessionStorage.getItem('basketShip'); SHIP = sh > 0 ? sh : null; } catch(e){}
 try { BASKET = JSON.parse(sessionStorage.getItem('basket') || '[]'); BASKET.forEach(b => { if (!b.qty) b.qty = 1; if (b.net == null && b.price) b.net = Math.round(b.price / 1.15 * 100) / 100; }); } catch(e){ BASKET = []; }
 async function start(){
-  if (DEMO){ USER = { email: 'demo', admin: true }; return openCatalog(false).catch(e => banner(esc(e.message))); }
+  if (DEMO){ const st = location.hash === '#staff'; setStaff(st); USER = { email: 'demo', admin: !st, role: st ? 'staff' : 'admin' }; return openCatalog(false).catch(e => banner(esc(e.message))); }
   loading('جاري التحميل…', 0.01);
   try { await loadFirebase(); }
   catch(e){
     const cached = await idbGet('catalog').catch(() => null);
-    if (cached){ loadText(cached.text, cached.meta); banner('ما فيه إنترنت — أعرض البيانات المحفوظة على الجهاز.'); return goSearch(); }
+    if (cached){ setStaff(cached.role === 'staff'); loadText(cached.text, cached.meta); banner('ما فيه إنترنت — أعرض البيانات المحفوظة على الجهاز.'); return goSearch(); }
     loading('ما قدرت أتصل. تأكد من الإنترنت وافتح الصفحة من جديد.', 0); return;
   }
   FB.a.onAuthStateChanged(auth, async u => {
     if (!u){ USER = null; $('menuBtn').classList.add('hidden'); banner(''); show('vLogin'); return; }
-    USER = { email: u.email, admin: false };
+    USER = { email: u.email, admin: false, role: '' };
     try {
       loading('أتأكد من الصلاحية…', 0.01);
-      USER.admin = await isAdmin(u.email);
-      if (!USER.admin){ banner('حسابك ما له صلاحية على هالموقع.'); ['menuBtn'].forEach(id => $(id).classList.remove('hidden')); ['mUpdate','mReload','mSearch'].forEach(id => $(id).classList.add('hidden')); show('vLogin'); return; }
+      USER.role = await getRole(u.email); USER.admin = USER.role === 'admin'; setStaff(USER.role === 'staff');
+      if (!USER.role){ banner('حسابك ما له صلاحية على هالموقع.'); ['menuBtn'].forEach(id => $(id).classList.remove('hidden')); ['mUpdate','mReload','mSearch'].forEach(id => $(id).classList.add('hidden')); show('vLogin'); return; }
       await openCatalog(false);
     } catch(e){
       const cached = await idbGet('catalog').catch(() => null);
-      if (cached){ loadText(cached.text, cached.meta); banner('ما فيه إنترنت — أعرض البيانات المحفوظة على الجهاز.'); USER.admin = true; return goSearch(); }
+      if (cached){ const st = cached.role === 'staff'; setStaff(st); USER.role = st ? 'staff' : 'admin'; USER.admin = !st; loadText(cached.text, cached.meta); banner('ما فيه إنترنت — أعرض البيانات المحفوظة على الجهاز.'); return goSearch(); }
       banner('صار خطأ: ' + esc(e.message)); show('vLogin');
     }
   });
 }
-window.__app = { search: q => search(q).map(row), doSearch, replyText, buildQuotePdf, get CAT(){ return CAT; }, get BASKET(){ return BASKET; } };
+window.__app = { search: q => search(q).map(row), doSearch, replyText, buildQuotePdf, staffLine, get STAFF(){ return STAFF; }, get CAT(){ return CAT; }, get BASKET(){ return BASKET; } };
 start();
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
