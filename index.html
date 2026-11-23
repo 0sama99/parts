@@ -88,6 +88,10 @@ header{position:sticky;top:0;z-index:20;background:var(--brand);color:var(--bran
 .rtot{margin:10px 0;padding:10px;border-radius:12px}
 .rtot .cp{border-top:1px solid var(--main-line);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14.5px}
 .rtot .cp span span{color:var(--muted)}
+.rship{margin:0 0 10px;padding:10px;border-radius:12px}
+.rship .vin input{font-size:18px;font-weight:600;border-color:var(--line)}
+.rship .gt{border-top:1px solid var(--line);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.rship .gt span{color:var(--muted)}
 .warn{margin-top:6px;background:var(--nobg);color:var(--no);border-radius:8px;padding:4px 8px;font-size:13.5px;font-weight:600}
 .disc span{color:var(--ink);font-weight:600}
 .disc button{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--card);font-size:18px;line-height:1;color:var(--ink)}
@@ -238,6 +242,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;margin-top:24px}
     <div style="display:flex;align-items:center;margin-bottom:6px"><b style="flex:1">الرد على الزبون</b><button class="btn sec" id="rClose" style="padding:6px 12px">إغلاق</button></div>
     <div id="rItems"></div>
     <div id="rTot"></div>
+    <div id="rShipBox"></div>
     <label class="chk"><input type="checkbox" id="rShowPn"> إظهار رقم القطعة للزبون</label>
     <div class="hint" style="margin-top:8px">تقدر تعدّل النص قبل الإرسال:</div>
     <textarea id="rText"></textarea>
@@ -358,6 +363,7 @@ const DOVR = new Map();
 const POVR = new Map(); // أسعار كتبتها بيدك — مؤقتة
 const VINC = new Map(); // السعر شامل الضريبة اللي كتبته بيدك بالضبط (مثل 33.00) — مؤقت
 const CQTY = new Map(); // الكمية اللي اخترتها في البطاقة قبل الإضافة — مؤقتة
+let SHIP = null; // رسوم الشحن بالريال — خارج الفاتورة وبدون ضريبة، ما تدخل في المجموع ولا الربح (null = بدون شحن)
 let TOT = null; // المجموع شامل الضريبة اللي كتبته بيدك في صفحة الرد — مؤقت (null = الأصلي)
 let DGAP = +(localStorage.getItem('discGap') || 10);
 
@@ -594,7 +600,7 @@ function toggleBasket(i){
   }
   TOT = null; saveBasket(); renderBasketBar();
 }
-function saveBasket(){ try { sessionStorage.setItem('basket', JSON.stringify(BASKET)); sessionStorage.setItem('basketTot', TOT == null ? '' : String(TOT)); } catch(e){} }
+function saveBasket(){ try { sessionStorage.setItem('basket', JSON.stringify(BASKET)); sessionStorage.setItem('basketTot', TOT == null ? '' : String(TOT)); sessionStorage.setItem('basketShip', SHIP == null ? '' : String(SHIP)); } catch(e){} }
 
 /* المجموع اللي تكتبه بيدك: الفرق يتوزع على القطع بالنسبة (مثل نظام المحل)، وهللات التقريب على أغلى قطعة كميتها ١ */
 const r2 = v => Math.round(v * 100) / 100;
@@ -668,7 +674,12 @@ function replyText(){
     if (b.elec && (b.avail || isOrder(b))) L.push('⚡ قطعة كهربائية');
     L.push('');
   }
-  if (priced > 1 || (priced === 1 && BASKET.length > 1)) { L.push(`💰 المجموع: ${fmt2(total)} ريال شامل الضريبة`); L.push(''); }
+  const ship = shipFee();
+  if (priced > 1 || (priced === 1 && BASKET.length > 1) || (ship && priced)) {
+    L.push(`💰 المجموع: ${fmt2(total)} ريال شامل الضريبة`);
+    if (ship){ L.push(`🚚 رسوم الشحن: ${fmt2(ship)} ريال`); L.push(`💰 الإجمالي مع الشحن: ${fmt2(r2(total + ship))} ريال`); }
+    L.push('');
+  }
   const pol = policyText();
   if (japan) L.push('⚠️ الطلب من اليابان ممكن يجينا فيه إشعار إن تصنيع القطعة متوقف.');
   if (pol) L.push('⚠️ ' + pol);
@@ -676,7 +687,7 @@ function replyText(){
   L.push('الموسى لقطع غيار تويوتا ولكزس وديهاتسو');
   return L.join('\n');
 }
-function openSheet(){ renderItems(); renderTot(true); $('rShowPn').checked = SHOW_PN; $('rText').value = replyText(); $('rSheet').classList.remove('hidden'); }
+function openSheet(){ renderItems(); renderTot(true); renderShip(true); $('rShowPn').checked = SHOW_PN; $('rText').value = replyText(); $('rSheet').classList.remove('hidden'); }
 function renderItems(){
   const E = effPrices();
   $('rItems').innerHTML = BASKET.map((b, k) => {
@@ -718,11 +729,26 @@ function renderTot(withInput){
       <div data-tinfo></div></div>`;
   }
   box.querySelector('#rTotReset').classList.toggle('hidden', !on);
+  renderShip(false);
   box.querySelector('[data-tinfo]').innerHTML = `
     ${on ? `<div class="s" style="margin-top:4px">قبل التعديل ${money(orig)} · ${diff >= 0 ? 'الخصم' : 'الزيادة'} ${money(Math.abs(diff))} (${N(pct, 2)}%) — وزّعته على القطع بالنسبة</div>` : ''}
     ${on && Math.abs(cur - TOT) >= 0.005 ? `<div class="warn">أقرب مجموع ممكن بالكميات الحالية: ${money(cur)}</div>` : ''}
     ${av.length ? `<div class="cp"><span><span>التكلفة للقطع كاملة (بدون ضريبة)</span> <b>${money(cost)}</b></span>${net ? `<span><span>الربح</span> <b>${money(net - cost)}</b> <span>(${N((net - cost) / net * 100, 2)}%)</span></span>` : ''}</div>
     <div class="s" style="margin-top:2px">الربح = المجموع بدون ضريبة للقطع المتوفرة ${money(net)} − التكلفة${note ? ' · ' + note : ''}</div>` : ''}`;
+}
+function shipFee(){ return SHIP != null && SHIP > 0 ? r2(SHIP) : 0; }
+function partsTotal(){ const E = effPrices(); return r2(pricedItems().reduce((s, b) => s + r2(E.get(b).unit * b.qty), 0)); }
+function renderShip(withInput){
+  const box = $('rShipBox');
+  if (!origTotal()){ box.innerHTML = ''; return; }
+  if (withInput || !box.querySelector('#rShip')){
+    box.innerHTML = `<div class="pr rship">
+      <div class="l">رسوم الشحن (إذا الزبون يبي شحن)</div>
+      <div class="vin"><input id="rShip" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" value="${SHIP ? fmt2(SHIP) : ''}"><span>ريال</span><span class="h">خارج الفاتورة · بدون ضريبة</span></div>
+      <div data-sinfo></div></div>`;
+  }
+  const ship = shipFee();
+  box.querySelector('[data-sinfo]').innerHTML = ship ? `<div class="gt"><span>الإجمالي مع الشحن</span><b>${money(r2(partsTotal() + ship))} ريال</b></div>` : '';
 }
 function setOrderDisc(k, d){ const b = BASKET[k]; b.odisc = Math.max(0, Math.min(100, Math.round((+d || 0) * 100) / 100)); b.price = orderPrice(b); TOT = null; saveBasket(); }
 function waPhone(p){ p = (p || '').replace(/\D/g, ''); if (/^05\d{8}$/.test(p)) return '966' + p.slice(1); if (/^5\d{8}$/.test(p)) return '966' + p; if (/^9665\d{8}$/.test(p)) return p; if (/^009665\d{8}$/.test(p)) return p.slice(2); return ''; }
@@ -975,7 +1001,8 @@ async function buildQuotePdf(customer){
   if (pol) notes.push(pol);
   const tw = 640, nw = CW - tw - gap;
   const nLines = notes.flatMap(n => wrap(n, nw - 70, 25, false).map((s2, j) => ({ s: s2, first: j === 0, red: n === pol })));
-  const notesH = 58 + 24 + nLines.length * 40 + 16, totalsH = 3 * 72;
+  const ship = shipFee();
+  const notesH = 58 + 24 + nLines.length * 40 + 16, totalsH = 3 * 72 + (ship ? 6 + 24 + 2 * 72 + 6 : 0);
   if (y + 40 + Math.max(notesH, totalsH) > bottom){ newPage(); y += 10; }
   y += 40;
   // المجاميع (يسار)
@@ -987,6 +1014,8 @@ async function buildQuotePdf(customer){
   };
   trow('المجموع قبل الضريبة', sub, 0, false); trow('ضريبة القيمة المضافة 15%', vat, 1, false); trow('الإجمالي شامل الضريبة', inc, 2, true);
   box(L, y + 3 * 72, tw, 6, RED);
+  // رسوم الشحن: خارج الفاتورة وبدون ضريبة، تحت الإجمالي بمسافة
+  if (ship){ const y0 = y; y += 3 * 72 + 6 + 24; trow('رسوم الشحن', ship, 0, false); trow('الإجمالي مع الشحن', r2(inc + ship), 1, true); box(L, y + 2 * 72, tw, 6, RED); y = y0; }
   // الشروط والملاحظات (يمين)
   const nx = R - nw;
   box(nx, y, nw, notesH, null, C422, 2); box(nx, y, nw, 58, CHAMP); x.strokeStyle = C422; x.strokeRect(nx, y, nw, 58);
@@ -1087,6 +1116,12 @@ $('rItems').addEventListener('change', e => {
   const t = e.target.dataset.otype; if (t != null){ BASKET[+t].order = e.target.value; TOT = null; saveBasket(); openSheet(); return; }
   const o = e.target.dataset.odisc; if (o != null){ setOrderDisc(+o, e.target.value); openSheet(); }
 });
+$('rShipBox').addEventListener('input', e => {
+  if (e.target.id !== 'rShip') return;
+  const v = +e.target.value; SHIP = e.target.value !== '' && v > 0 ? r2(v) : null;
+  saveBasket(); renderShip(false); $('rText').value = replyText();
+});
+$('rShipBox').addEventListener('change', e => { if (e.target.id === 'rShip'){ e.target.value = SHIP ? fmt2(SHIP) : ''; } });
 $('rTot').addEventListener('input', e => {
   if (e.target.id !== 'rTotIn' || e.target.value === '') return;
   const v = r2(+e.target.value); TOT = v > 0 ? v : null; saveBasket();
@@ -1104,7 +1139,7 @@ $('rItems').onclick = e => {
 const needType = () => { if (BASKET.some(b => !b.avail && !b.order)){ toast('اختر نوع الطلب لكل طلبية أول'); return true; } return false; };
 $('rCopy').onclick = async () => { if (needType()) return; if (await copyText($('rText').value)) toast('تم النسخ — الصقه في محادثة الزبون'); };
 $('rWa').onclick = () => { if (needType()) return; const p = waPhone($('rPhone').value); if ($('rPhone').value.trim() && !p){ toast('رقم الجوال غير صحيح'); return; } window.open(`https://wa.me/${p}?text=${encodeURIComponent($('rText').value)}`, '_blank'); };
-$('rClear').onclick = () => { BASKET = []; TOT = null; saveBasket(); renderBasketBar(); $('rSheet').classList.add('hidden'); if ($('q').value.trim()) doSearch($('q').value); };
+$('rClear').onclick = () => { BASKET = []; TOT = null; SHIP = null; saveBasket(); renderBasketBar(); $('rSheet').classList.add('hidden'); if ($('q').value.trim()) doSearch($('q').value); };
 $('loginForm').addEventListener('submit', async e => {
   e.preventDefault(); $('lErr').textContent = ''; $('lBtn').disabled = true;
   try { await FB.a.signInWithEmailAndPassword(auth, $('lEmail').value.trim(), $('lPass').value); }
@@ -1118,6 +1153,7 @@ $('lReset').onclick = async () => {
 
 /* ---------- البداية ---------- */
 try { const t = +sessionStorage.getItem('basketTot'); TOT = t > 0 ? t : null; } catch(e){}
+try { const sh = +sessionStorage.getItem('basketShip'); SHIP = sh > 0 ? sh : null; } catch(e){}
 try { BASKET = JSON.parse(sessionStorage.getItem('basket') || '[]'); BASKET.forEach(b => { if (!b.qty) b.qty = 1; if (b.net == null && b.price) b.net = Math.round(b.price / 1.15 * 100) / 100; }); } catch(e){ BASKET = []; }
 async function start(){
   if (DEMO){ USER = { email: 'demo', admin: true }; return openCatalog(false).catch(e => banner(esc(e.message))); }
